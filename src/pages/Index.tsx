@@ -73,21 +73,35 @@ const Index = () => {
   const [votedIssues, setVotedIssues] = useState<Set<string>>(new Set(['1'])); // Mock user already voted on issue 1
   const { toast } = useToast();
 
-  // Sort issues by votes (descending) and then by date (most recent first)
-  const sortedIssues = useMemo(() => {
-    return [...issues]
-      .filter(issue => 
-        issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        issue.description.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+  // Filter issues based on search
+  const filteredIssues = useMemo(() => {
+    return issues.filter(issue => 
+      issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      issue.description.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [issues, searchTerm]);
+
+  // Top 10 issues by votes
+  const top10Issues = useMemo(() => {
+    return [...filteredIssues]
       .sort((a, b) => {
         if (a.votes === b.votes) {
           return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         }
         return b.votes - a.votes;
       })
-      .slice(0, 10); // Top 10
-  }, [issues, searchTerm]);
+      .slice(0, 10);
+  }, [filteredIssues]);
+
+  // Recent issues (last 2 days)
+  const recentIssues = useMemo(() => {
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    
+    return [...filteredIssues]
+      .filter(issue => issue.createdAt > twoDaysAgo)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [filteredIssues]);
 
   const handleVote = (issueId: string) => {
     if (votedIssues.has(issueId)) return;
@@ -215,7 +229,7 @@ const Index = () => {
                 <TrendingUp className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-foreground">{sortedIssues.slice(0, 3).reduce((sum, issue) => sum + issue.votes, 0)}</div>
+                <div className="text-2xl font-bold text-foreground">{top10Issues.slice(0, 3).reduce((sum, issue) => sum + issue.votes, 0)}</div>
                 <div className="text-sm text-muted-foreground">Top 3 Issues Votes</div>
               </div>
             </div>
@@ -250,18 +264,53 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Issues List */}
+        {/* Recent Issues (Last 2 Days) */}
+        {recentIssues.length > 0 && (
+          <div className="space-y-6 mb-12">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <AlertTriangle className="h-6 w-6 text-accent" />
+                Recent Issues (Last 2 Days) {searchTerm && `(filtered)`}
+              </h2>
+              <Badge variant="secondary" className="text-sm bg-accent/10 text-accent">
+                {recentIssues.length} new
+              </Badge>
+            </div>
+            
+            <div className="grid gap-6">
+              {recentIssues.map((issue) => (
+                <div key={`recent-${issue.id}`} className="relative">
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-2 -left-2 z-10 text-xs bg-accent text-accent-foreground"
+                  >
+                    NEW
+                  </Badge>
+                  <IssueCard
+                    issue={issue}
+                    onVote={handleVote}
+                    onAddCustomerData={handleAddCustomerData}
+                    hasVoted={votedIssues.has(issue.id)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Top 10 Issues */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground">
-              Top Issues {searchTerm && `(filtered)`}
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              Top 10 Issues {searchTerm && `(filtered)`}
             </h2>
             <Badge variant="secondary" className="text-sm">
-              Showing {sortedIssues.length} of {issues.length}
+              Showing {top10Issues.length} of {filteredIssues.length}
             </Badge>
           </div>
           
-          {sortedIssues.length === 0 ? (
+          {top10Issues.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-muted-foreground text-lg">
                 {searchTerm ? 'No issues match your search.' : 'No issues reported yet.'}
@@ -278,20 +327,19 @@ const Index = () => {
             </div>
           ) : (
             <div className="grid gap-6">
-              {sortedIssues.map((issue, index) => (
+              {top10Issues.map((issue, index) => (
                 <div key={issue.id} className="relative">
-                  {index < 3 && (
-                    <Badge 
-                      variant="secondary" 
-                      className={`absolute -top-2 -left-2 z-10 text-xs ${
-                        index === 0 ? 'bg-vote text-vote-foreground' : 
-                        index === 1 ? 'bg-accent text-accent-foreground' : 
-                        'bg-primary text-primary-foreground'
-                      }`}
-                    >
-                      #{index + 1}
-                    </Badge>
-                  )}
+                  <Badge 
+                    variant="secondary" 
+                    className={`absolute -top-2 -left-2 z-10 text-xs ${
+                      index === 0 ? 'bg-vote text-vote-foreground' : 
+                      index === 1 ? 'bg-accent text-accent-foreground' : 
+                      index < 3 ? 'bg-primary text-primary-foreground' :
+                      'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    #{index + 1}
+                  </Badge>
                   <IssueCard
                     issue={issue}
                     onVote={handleVote}
