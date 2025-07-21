@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive } from 'lucide-react';
 import { Issue, CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +19,7 @@ const mockIssues: Issue[] = [
     votes: 8,
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-01-15'),
+    closed: false,
     votedBy: ['user1', 'user2'],
     customerData: [
       {
@@ -43,6 +45,7 @@ const mockIssues: Issue[] = [
     votes: 6,
     createdAt: new Date('2024-01-14'),
     updatedAt: new Date('2024-01-14'),
+    closed: false,
     votedBy: ['user3'],
     customerData: [
       {
@@ -61,6 +64,7 @@ const mockIssues: Issue[] = [
     votes: 4,
     createdAt: new Date('2024-01-13'),
     updatedAt: new Date('2024-01-13'),
+    closed: false,
     votedBy: [],
     customerData: []
   }
@@ -73,12 +77,14 @@ const Index = () => {
   const [votedIssues, setVotedIssues] = useState<Set<string>>(new Set(['1'])); // Mock user already voted on issue 1
   const { toast } = useToast();
 
-  // Filter issues based on search
+  // Filter issues based on search (only show open issues on main page)
   const filteredIssues = useMemo(() => {
-    return issues.filter(issue => 
-      issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      issue.description.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return issues
+      .filter(issue => !issue.closed) // Only show open issues
+      .filter(issue => 
+        issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        issue.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
   }, [issues, searchTerm]);
 
   // Top 10 issues by votes
@@ -119,6 +125,24 @@ const Index = () => {
     });
   };
 
+  const handleCloseIssue = (issueId: string) => {
+    setIssues(prev => prev.map(issue => 
+      issue.id === issueId 
+        ? { 
+            ...issue, 
+            closed: true,
+            closedAt: new Date(),
+            closedBy: 'currentUser'
+          }
+        : issue
+    ));
+    
+    toast({
+      title: "Issue closed",
+      description: "The issue has been marked as closed.",
+    });
+  };
+
   const handleAddCustomerData = (issueId: string, customerData: CustomerData) => {
     setIssues(prev => prev.map(issue => 
       issue.id === issueId 
@@ -144,6 +168,7 @@ const Index = () => {
       votes: 1, // Creator automatically votes
       createdAt: new Date(),
       updatedAt: new Date(),
+      closed: false,
       votedBy: ['currentUser'],
       customerData: customerData ? [customerData] : []
     };
@@ -158,8 +183,10 @@ const Index = () => {
     });
   };
 
-  const totalVotes = issues.reduce((sum, issue) => sum + issue.votes, 0);
-  const totalCustomerExamples = issues.reduce((sum, issue) => sum + issue.customerData.length, 0);
+  const totalVotes = issues.filter(issue => !issue.closed).reduce((sum, issue) => sum + issue.votes, 0);
+  const totalCustomerExamples = issues.filter(issue => !issue.closed).reduce((sum, issue) => sum + issue.customerData.length, 0);
+  const openIssuesCount = issues.filter(issue => !issue.closed).length;
+  const closedIssuesCount = issues.filter(issue => issue.closed).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,8 +202,12 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <div className="text-2xl font-bold">{issues.length}</div>
-                <div className="text-sm text-primary-foreground/80">Active Issues</div>
+                <div className="text-2xl font-bold">{openIssuesCount}</div>
+                <div className="text-sm text-primary-foreground/80">Open Issues</div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold">{closedIssuesCount}</div>
+                <div className="text-sm text-primary-foreground/80">Closed Issues</div>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold">{totalVotes}</div>
@@ -188,6 +219,23 @@ const Index = () => {
       </header>
 
       <div className="container mx-auto px-6 py-8">
+        {/* Navigation */}
+        <div className="flex items-center gap-4 mb-6">
+          <Link 
+            to="/"
+            className="text-primary font-medium border-b-2 border-primary pb-1"
+          >
+            Open Issues
+          </Link>
+          <Link 
+            to="/closed"
+            className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
+          >
+            <Archive className="h-4 w-4" />
+            Closed Issues ({closedIssuesCount})
+          </Link>
+        </div>
+
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1">
@@ -290,6 +338,7 @@ const Index = () => {
                     issue={issue}
                     onVote={handleVote}
                     onAddCustomerData={handleAddCustomerData}
+                    onCloseIssue={handleCloseIssue}
                     hasVoted={votedIssues.has(issue.id)}
                   />
                 </div>
@@ -344,6 +393,7 @@ const Index = () => {
                     issue={issue}
                     onVote={handleVote}
                     onAddCustomerData={handleAddCustomerData}
+                    onCloseIssue={handleCloseIssue}
                     hasVoted={votedIssues.has(issue.id)}
                   />
                 </div>

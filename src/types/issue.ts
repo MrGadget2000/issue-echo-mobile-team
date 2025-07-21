@@ -15,4 +15,7 @@ export interface Issue {
   createdAt: Date;
   updatedAt: Date;
   votedBy: string[]; // Track who voted to prevent duplicate votes
+  closed: boolean;
+  closedAt?: Date;
+  closedBy?: string;
 }

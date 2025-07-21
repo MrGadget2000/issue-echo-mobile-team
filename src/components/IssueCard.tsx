@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ThumbsUp, Users, Clock, Phone, Package } from 'lucide-react';
+import { ThumbsUp, Users, Clock, Phone, Package, X } from 'lucide-react';
 import { Issue } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
 import { formatDistanceToNow } from 'date-fns';
@@ -12,10 +12,12 @@ interface IssueCardProps {
   issue: Issue;
   onVote: (issueId: string) => void;
   onAddCustomerData: (issueId: string, customerData: any) => void;
+  onCloseIssue?: (issueId: string) => void;
   hasVoted: boolean;
+  showCloseButton?: boolean;
 }
 
-export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueCardProps) {
+export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, hasVoted, showCloseButton = true }: IssueCardProps) {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
 
   const handleVote = () => {
@@ -30,11 +32,16 @@ export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueC
   };
 
   return (
-    <Card className="w-full bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth">
+    <Card className={`w-full bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg font-semibold text-foreground pr-4">
+          <CardTitle className={`text-lg font-semibold pr-4 ${issue.closed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
             {issue.title}
+            {issue.closed && (
+              <Badge variant="secondary" className="ml-2 text-xs bg-muted">
+                CLOSED
+              </Badge>
+            )}
           </CardTitle>
           <div className="flex items-center gap-2 flex-shrink-0">
             <Badge variant="secondary" className="flex items-center gap-1">
@@ -45,6 +52,12 @@ export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueC
               <Clock className="h-3 w-3" />
               {formatDistanceToNow(issue.createdAt, { addSuffix: true })}
             </Badge>
+            {issue.closed && issue.closedAt && (
+              <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
+                <X className="h-3 w-3" />
+                Closed {formatDistanceToNow(issue.closedAt, { addSuffix: true })}
+              </Badge>
+            )}
           </div>
         </div>
       </CardHeader>
@@ -101,7 +114,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueC
             variant={hasVoted ? "secondary" : "default"}
             size="sm"
             onClick={handleVote}
-            disabled={hasVoted}
+            disabled={hasVoted || issue.closed}
             className={`flex items-center gap-2 transition-bounce ${
               hasVoted ? 'bg-vote text-vote-foreground' : ''
             }`}
@@ -112,7 +125,12 @@ export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueC
           
           <Dialog open={showCustomerForm} onOpenChange={setShowCustomerForm}>
             <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={issue.closed}
+                className="flex items-center gap-2"
+              >
                 <Package className="h-4 w-4" />
                 Add Example
               </Button>
@@ -127,6 +145,18 @@ export function IssueCard({ issue, onVote, onAddCustomerData, hasVoted }: IssueC
               />
             </DialogContent>
           </Dialog>
+          
+          {showCloseButton && !issue.closed && onCloseIssue && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onCloseIssue(issue.id)}
+              className="flex items-center gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground ml-auto"
+            >
+              <X className="h-4 w-4" />
+              Close
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
