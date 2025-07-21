@@ -37,7 +37,7 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="customerName">Customer Name</Label>
@@ -106,10 +106,14 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" className="bg-gradient-primary">
+        <Button 
+          type="button" 
+          className="bg-gradient-primary"
+          onClick={handleSubmit}
+        >
           Add Example
         </Button>
       </div>
-    </form>
+    </div>
   );
 }
