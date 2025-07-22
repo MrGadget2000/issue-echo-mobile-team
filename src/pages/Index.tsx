@@ -203,7 +203,7 @@ const Index = () => {
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
           <Link to="/" className="text-primary font-medium border-b-2 border-primary pb-1">
-            Open Issues
+            Open Issues ({openIssuesCount})
           </Link>
           <Link to="/closed" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
             <Archive className="h-4 w-4" />
