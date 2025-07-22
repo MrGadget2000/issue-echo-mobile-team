@@ -55,6 +55,19 @@ const ClosedIssues = () => {
     });
   };
 
+  const handleReopenIssue = (issueId: string) => {
+    // In a real app, this would update the shared state/context
+    // For now, just show a toast indicating the action
+    toast({
+      title: "Issue reopened",
+      description: "The issue has been moved back to the open issues list.",
+    });
+    
+    // In a real implementation, you'd update the shared state here
+    // For demo purposes, we'll just remove it from the local view
+    window.location.href = '/';
+  };
+
   const handleAddCustomerData = (issueId: string, customerData: CustomerData) => {
     // Closed issues can't have new customer data added
     toast({
@@ -143,6 +156,7 @@ const ClosedIssues = () => {
                   issue={issue}
                   onVote={handleVote}
                   onAddCustomerData={handleAddCustomerData}
+                  onReopenIssue={handleReopenIssue}
                   hasVoted={votedIssues.has(issue.id)}
                   showCloseButton={false}
                 />

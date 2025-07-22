@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ThumbsUp, Users, Clock, Phone, Package, X } from 'lucide-react';
+import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw } from 'lucide-react';
 import { Issue } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
 import { formatDistanceToNow } from 'date-fns';
@@ -13,11 +13,12 @@ interface IssueCardProps {
   onVote: (issueId: string) => void;
   onAddCustomerData: (issueId: string, customerData: any) => void;
   onCloseIssue?: (issueId: string) => void;
+  onReopenIssue?: (issueId: string) => void;
   hasVoted: boolean;
   showCloseButton?: boolean;
 }
 
-export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, hasVoted, showCloseButton = true }: IssueCardProps) {
+export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, hasVoted, showCloseButton = true }: IssueCardProps) {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
 
   const handleVote = () => {
@@ -155,6 +156,18 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, hasV
             >
               <X className="h-4 w-4" />
               Close
+            </Button>
+          )}
+          
+          {issue.closed && onReopenIssue && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onReopenIssue(issue.id)}
+              className="flex items-center gap-2 text-primary hover:bg-primary hover:text-primary-foreground ml-auto"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Reopen
             </Button>
           )}
         </div>
