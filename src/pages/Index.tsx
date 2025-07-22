@@ -59,6 +59,26 @@ const mockIssues: Issue[] = [{
   closed: false,
   votedBy: [],
   customerData: []
+}, {
+  id: 'closed-1',
+  title: 'Legacy system integration timeout errors',
+  description: 'Intermittent timeout errors when integrating with legacy billing system during peak hours.',
+  votes: 12,
+  createdAt: new Date('2024-01-10'),
+  updatedAt: new Date('2024-01-12'),
+  closed: true,
+  closedAt: new Date('2024-01-12'),
+  closedBy: 'admin',
+  votedBy: ['user1', 'user2', 'user3'],
+  customerData: [
+    {
+      customerName: 'Jennifer Smith',
+      orderId: 'ORD-3321',
+      phoneNumber: '+1 (555) 111-2222',
+      serviceType: 'plan-change',
+      additionalDetails: 'System timed out during plan upgrade, customer charged twice'
+    }
+  ]
 }];
 const Index = () => {
   const [issues, setIssues] = useState<Issue[]>(mockIssues);

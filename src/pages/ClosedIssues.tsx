@@ -8,30 +8,78 @@ import { Issue, CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 
 // This would typically come from a shared state or context
-// For now, using the same mock data structure
-const mockClosedIssues: Issue[] = [
-  {
-    id: 'closed-1',
-    title: 'Legacy system integration timeout errors',
-    description: 'Intermittent timeout errors when integrating with legacy billing system during peak hours.',
-    votes: 12,
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12'),
-    closed: true,
-    closedAt: new Date('2024-01-12'),
-    closedBy: 'admin',
-    votedBy: ['user1', 'user2', 'user3'],
-    customerData: [
-      {
-        customerName: 'Jennifer Smith',
-        orderId: 'ORD-3321',
-        phoneNumber: '+1 (555) 111-2222',
-        serviceType: 'plan-change',
-        additionalDetails: 'System timed out during plan upgrade, customer charged twice'
-      }
-    ]
-  }
-];
+// Using the same mock data structure as Index.tsx
+const mockAllIssues: Issue[] = [{
+  id: '1',
+  title: 'Porting delays from Verizon to our network',
+  description: 'Customers are experiencing 3-5 day delays when porting numbers from Verizon. This is causing customer dissatisfaction and potential churn.',
+  votes: 8,
+  createdAt: new Date('2024-01-15'),
+  updatedAt: new Date('2024-01-15'),
+  closed: false,
+  votedBy: ['user1', 'user2'],
+  customerData: [{
+    customerName: 'Sarah Johnson',
+    orderId: 'ORD-4567',
+    phoneNumber: '+1 (555) 123-4567',
+    serviceType: 'port-in',
+    additionalDetails: 'Customer called 3 times asking for updates. Very frustrated.'
+  }, {
+    customerName: 'Mike Chen',
+    orderId: 'ORD-4890',
+    phoneNumber: '+1 (555) 987-6543',
+    serviceType: 'port-in',
+    additionalDetails: 'Business customer threatening to cancel due to delay'
+  }]
+}, {
+  id: '2',
+  title: 'SIM card activation failing for iPhone 15 Pro',
+  description: 'New iPhone 15 Pro devices are not properly activating with our SIM cards. Error shows "SIM not supported" despite being compatible.',
+  votes: 6,
+  createdAt: new Date('2024-01-14'),
+  updatedAt: new Date('2024-01-14'),
+  closed: false,
+  votedBy: ['user3'],
+  customerData: [{
+    customerName: 'Alex Rivera',
+    orderId: 'ORD-4567',
+    phoneNumber: '+1 (555) 456-7890',
+    serviceType: 'new-activation',
+    additionalDetails: 'Customer purchased iPhone 15 Pro Max 256GB in Space Black'
+  }]
+}, {
+  id: '3',
+  title: 'Plan change causing data throttling issues',
+  description: 'When customers upgrade their data plans, the system is not properly updating their throttling limits, causing unexpected slowdowns.',
+  votes: 4,
+  createdAt: new Date('2024-01-13'),
+  updatedAt: new Date('2024-01-13'),
+  closed: false,
+  votedBy: [],
+  customerData: []
+}, {
+  id: 'closed-1',
+  title: 'Legacy system integration timeout errors',
+  description: 'Intermittent timeout errors when integrating with legacy billing system during peak hours.',
+  votes: 12,
+  createdAt: new Date('2024-01-10'),
+  updatedAt: new Date('2024-01-12'),
+  closed: true,
+  closedAt: new Date('2024-01-12'),
+  closedBy: 'admin',
+  votedBy: ['user1', 'user2', 'user3'],
+  customerData: [
+    {
+      customerName: 'Jennifer Smith',
+      orderId: 'ORD-3321',
+      phoneNumber: '+1 (555) 111-2222',
+      serviceType: 'plan-change',
+      additionalDetails: 'System timed out during plan upgrade, customer charged twice'
+    }
+  ]
+}];
+
+const mockClosedIssues = mockAllIssues.filter(issue => issue.closed);
 
 const ClosedIssues = () => {
   const [searchTerm, setSearchTerm] = useState('');
