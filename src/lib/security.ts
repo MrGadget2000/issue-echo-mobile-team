@@ -38,8 +38,8 @@ export function sanitizePhoneNumber(phone: string): string {
 export function sanitizeOrderId(orderId: string): string {
   if (!orderId) return orderId;
   
-  // Allow only alphanumeric characters, dashes, and uppercase letters
-  return orderId.replace(/[^A-Z0-9\-]/g, '').toUpperCase().trim();
+  // Allow only numeric characters
+  return orderId.replace(/[^\d]/g, '').trim();
 }
 
 // Rate limiting helper (for future use)

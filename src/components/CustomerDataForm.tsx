@@ -108,7 +108,7 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
             id="orderId"
             value={formData.orderId}
             onChange={(e) => handleInputChange('orderId', e.target.value)}
-            placeholder="ORD-12345"
+            placeholder="123456"
             className={errors.orderId ? 'border-destructive' : ''}
           />
           {errors.orderId && (
@@ -124,7 +124,7 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
             id="phoneNumber"
             value={formData.phoneNumber}
             onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-            placeholder="+1 (555) 123-4567"
+            placeholder="021 123 4567"
             className={errors.phoneNumber ? 'border-destructive' : ''}
           />
           {errors.phoneNumber && (
