@@ -121,7 +121,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
             }`}
           >
             <ThumbsUp className={`h-4 w-4 ${hasVoted ? 'fill-current' : ''}`} />
-            {hasVoted ? 'Voted' : 'Also have this issue'}
+            {hasVoted ? 'Voted' : 'I have this issue also'}
           </Button>
           
           <Dialog open={showCustomerForm} onOpenChange={setShowCustomerForm}>
