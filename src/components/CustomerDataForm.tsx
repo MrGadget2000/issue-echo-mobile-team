@@ -5,6 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CustomerData } from '@/types/issue';
+import { customerDataSchema } from '@/lib/validation';
+import { sanitizeText, sanitizePhoneNumber, sanitizeOrderId } from '@/lib/security';
+import { useToast } from '@/hooks/use-toast';
 
 interface CustomerDataFormProps {
   onSubmit: (data: CustomerData) => void;
@@ -19,20 +22,66 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
     serviceType: '',
     additionalDetails: ''
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const result = customerDataSchema.safeParse(formData);
+    
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(error => {
+        if (error.path.length > 0) {
+          fieldErrors[error.path[0]] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     // Only submit if at least one field is filled
     const hasData = Object.values(formData).some(value => value && value.trim() !== '');
     if (hasData) {
+      setErrors({});
       onSubmit(formData);
     }
   };
 
   const handleInputChange = (field: keyof CustomerData, value: string) => {
+    let sanitizedValue = value;
+    
+    // Apply field-specific sanitization
+    switch (field) {
+      case 'customerName':
+      case 'additionalDetails':
+        sanitizedValue = sanitizeText(value);
+        break;
+      case 'phoneNumber':
+        sanitizedValue = sanitizePhoneNumber(value);
+        break;
+      case 'orderId':
+        sanitizedValue = sanitizeOrderId(value);
+        break;
+      default:
+        sanitizedValue = sanitizeText(value);
+    }
+    
+    // Clear field-specific error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: sanitizedValue
     }));
   };
 
@@ -46,7 +95,11 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
             value={formData.customerName}
             onChange={(e) => handleInputChange('customerName', e.target.value)}
             placeholder="John Doe"
+            className={errors.customerName ? 'border-destructive' : ''}
           />
+          {errors.customerName && (
+            <p className="text-sm text-destructive">{errors.customerName}</p>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -56,7 +109,11 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
             value={formData.orderId}
             onChange={(e) => handleInputChange('orderId', e.target.value)}
             placeholder="ORD-12345"
+            className={errors.orderId ? 'border-destructive' : ''}
           />
+          {errors.orderId && (
+            <p className="text-sm text-destructive">{errors.orderId}</p>
+          )}
         </div>
       </div>
       
@@ -68,7 +125,11 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
             value={formData.phoneNumber}
             onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
             placeholder="+1 (555) 123-4567"
+            className={errors.phoneNumber ? 'border-destructive' : ''}
           />
+          {errors.phoneNumber && (
+            <p className="text-sm text-destructive">{errors.phoneNumber}</p>
+          )}
         </div>
         
         <div className="space-y-2">
@@ -99,7 +160,11 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
           onChange={(e) => handleInputChange('additionalDetails', e.target.value)}
           placeholder="Any additional context about this customer's issue..."
           rows={3}
+          className={errors.additionalDetails ? 'border-destructive' : ''}
         />
+        {errors.additionalDetails && (
+          <p className="text-sm text-destructive">{errors.additionalDetails}</p>
+        )}
       </div>
       
       <div className="flex justify-end gap-2 pt-4">

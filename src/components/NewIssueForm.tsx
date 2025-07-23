@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CustomerDataForm } from './CustomerDataForm';
 import { Plus, X } from 'lucide-react';
 import { CustomerData } from '@/types/issue';
+import { issueSchema } from '@/lib/validation';
+import { sanitizeText } from '@/lib/security';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewIssueFormProps {
   onSubmit: (title: string, description: string, customerData?: CustomerData) => void;
@@ -18,11 +21,40 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
   const [description, setDescription] = useState('');
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [customerData, setCustomerData] = useState<CustomerData | undefined>();
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (title.trim() && description.trim()) {
-      onSubmit(title.trim(), description.trim(), customerData);
+    
+    const sanitizedTitle = sanitizeText(title.trim());
+    const sanitizedDescription = sanitizeText(description.trim());
+    
+    // Validate the form data
+    const result = issueSchema.safeParse({
+      title: sanitizedTitle,
+      description: sanitizedDescription
+    });
+    
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach(error => {
+        if (error.path.length > 0) {
+          fieldErrors[error.path[0]] = error.message;
+        }
+      });
+      setErrors(fieldErrors);
+      toast({
+        title: "Validation Error",
+        description: "Please fix the errors in the form",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (sanitizedTitle && sanitizedDescription) {
+      setErrors({});
+      onSubmit(sanitizedTitle, sanitizedDescription, customerData);
     }
   };
 
@@ -47,10 +79,17 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                setTitle(sanitizeText(e.target.value));
+                if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+              }}
               placeholder="Brief description of the issue..."
               required
+              className={errors.title ? 'border-destructive' : ''}
             />
+            {errors.title && (
+              <p className="text-sm text-destructive">{errors.title}</p>
+            )}
           </div>
           
           <div className="space-y-2">
@@ -58,11 +97,18 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(sanitizeText(e.target.value));
+                if (errors.description) setErrors(prev => ({ ...prev, description: '' }));
+              }}
               placeholder="Detailed description of the issue, steps to reproduce, impact, etc..."
               rows={4}
               required
+              className={errors.description ? 'border-destructive' : ''}
             />
+            {errors.description && (
+              <p className="text-sm text-destructive">{errors.description}</p>
+            )}
           </div>
           
           <div className="space-y-4">

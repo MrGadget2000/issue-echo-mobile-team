@@ -7,6 +7,7 @@ import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw } from 'lucide-rea
 import { Issue } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
 import { formatDistanceToNow } from 'date-fns';
+import { sanitizeHtml } from '@/lib/security';
 
 interface IssueCardProps {
   issue: Issue;
@@ -37,7 +38,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <CardTitle className={`text-lg font-semibold pr-4 ${issue.closed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
-            {issue.title}
+            {sanitizeHtml(issue.title)}
             {issue.closed && (
               <Badge variant="secondary" className="ml-2 text-xs bg-muted">
                 CLOSED
@@ -64,7 +65,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <p className="text-muted-foreground leading-relaxed">{issue.description}</p>
+        <p className="text-muted-foreground leading-relaxed">{sanitizeHtml(issue.description)}</p>
         
         {issue.customerData.length > 0 && (
           <div className="space-y-2">
@@ -77,26 +78,26 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
                 <div key={index} className="text-xs bg-muted/50 rounded-md p-2 border">
                   <div className="flex flex-wrap gap-2">
                     {data.customerName && (
-                      <span className="text-foreground font-medium">{data.customerName}</span>
+                      <span className="text-foreground font-medium">{sanitizeHtml(data.customerName)}</span>
                     )}
                     {data.orderId && (
-                      <span className="text-muted-foreground">#{data.orderId}</span>
+                      <span className="text-muted-foreground">#{sanitizeHtml(data.orderId)}</span>
                     )}
                     {data.phoneNumber && (
                       <span className="flex items-center gap-1 text-muted-foreground">
                         <Phone className="h-3 w-3" />
-                        {data.phoneNumber}
+                        {sanitizeHtml(data.phoneNumber)}
                       </span>
                     )}
                     {data.serviceType && (
                       <Badge variant="outline" className="text-xs">
-                        {data.serviceType}
+                        {sanitizeHtml(data.serviceType)}
                       </Badge>
                     )}
                   </div>
                   {data.additionalDetails && (
                     <p className="text-muted-foreground mt-1 line-clamp-2">
-                      {data.additionalDetails}
+                      {sanitizeHtml(data.additionalDetails)}
                     </p>
                   )}
                 </div>
