@@ -18,4 +18,9 @@ export interface Issue {
   closed: boolean;
   closedAt?: Date;
   closedBy?: string;
+  workaroundAvailable?: string;
+  customerImpact?: 'none' | 'low' | 'medium' | 'high';
+  teamImpact?: 'none' | 'low' | 'medium' | 'high';
+  effortEstimate?: string;
+  churnRisk?: boolean;
 }

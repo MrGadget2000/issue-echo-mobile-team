@@ -18,7 +18,12 @@ export const issueSchema = z.object({
   description: z.string()
     .min(1, 'Description is required')
     .max(1000, 'Description must be less than 1000 characters')
-    .regex(/^[a-zA-Z0-9\s\-_.!?(),\n\r]+$/, 'Description contains invalid characters')
+    .regex(/^[a-zA-Z0-9\s\-_.!?(),\n\r]+$/, 'Description contains invalid characters'),
+  workaroundAvailable: z.string().max(500, 'Workaround description must be less than 500 characters').optional(),
+  customerImpact: z.enum(['none', 'low', 'medium', 'high']).optional(),
+  teamImpact: z.enum(['none', 'low', 'medium', 'high']).optional(),
+  effortEstimate: z.string().max(200, 'Effort estimate must be less than 200 characters').optional(),
+  churnRisk: z.boolean().optional()
 });
 
 export type CustomerDataInput = z.infer<typeof customerDataSchema>;

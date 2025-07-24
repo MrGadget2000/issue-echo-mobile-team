@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CustomerDataForm } from './CustomerDataForm';
 import { Plus, X } from 'lucide-react';
 import { CustomerData } from '@/types/issue';
@@ -12,7 +14,13 @@ import { sanitizeText } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
 
 interface NewIssueFormProps {
-  onSubmit: (title: string, description: string, customerData?: CustomerData) => void;
+  onSubmit: (title: string, description: string, customerData?: CustomerData, impactData?: {
+    workaroundAvailable?: string;
+    customerImpact?: 'none' | 'low' | 'medium' | 'high';
+    teamImpact?: 'none' | 'low' | 'medium' | 'high';
+    effortEstimate?: string;
+    churnRisk?: boolean;
+  }) => void;
   onCancel: () => void;
 }
 
@@ -21,6 +29,11 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
   const [description, setDescription] = useState('');
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [customerData, setCustomerData] = useState<CustomerData | undefined>();
+  const [workaroundAvailable, setWorkaroundAvailable] = useState('');
+  const [customerImpact, setCustomerImpact] = useState<'none' | 'low' | 'medium' | 'high' | ''>('');
+  const [teamImpact, setTeamImpact] = useState<'none' | 'low' | 'medium' | 'high' | ''>('');
+  const [effortEstimate, setEffortEstimate] = useState('');
+  const [churnRisk, setChurnRisk] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
@@ -33,7 +46,12 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
     // Validate the form data
     const result = issueSchema.safeParse({
       title: sanitizedTitle,
-      description: sanitizedDescription
+      description: sanitizedDescription,
+      workaroundAvailable: sanitizeText(workaroundAvailable.trim()),
+      customerImpact: customerImpact || undefined,
+      teamImpact: teamImpact || undefined,
+      effortEstimate: sanitizeText(effortEstimate.trim()),
+      churnRisk
     });
     
     if (!result.success) {
@@ -54,7 +72,14 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
     
     if (sanitizedTitle && sanitizedDescription) {
       setErrors({});
-      onSubmit(sanitizedTitle, sanitizedDescription, customerData);
+      const impactData = {
+        workaroundAvailable: workaroundAvailable.trim() || undefined,
+        customerImpact: (customerImpact as 'none' | 'low' | 'medium' | 'high') || undefined,
+        teamImpact: (teamImpact as 'none' | 'low' | 'medium' | 'high') || undefined,
+        effortEstimate: effortEstimate.trim() || undefined,
+        churnRisk
+      };
+      onSubmit(sanitizedTitle, sanitizedDescription, customerData, impactData);
     }
   };
 
@@ -169,6 +194,86 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
                 />
               </div>
             )}
+          </div>
+
+          <div className="space-y-6 border-t pt-6">
+            <h3 className="text-lg font-semibold">Impact Assessment</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="workaround">Available Workaround</Label>
+              <Textarea
+                id="workaround"
+                value={workaroundAvailable}
+                onChange={(e) => {
+                  setWorkaroundAvailable(sanitizeText(e.target.value));
+                  if (errors.workaroundAvailable) setErrors(prev => ({ ...prev, workaroundAvailable: '' }));
+                }}
+                placeholder="Describe any workarounds available to customers..."
+                rows={2}
+                className={errors.workaroundAvailable ? 'border-destructive' : ''}
+              />
+              {errors.workaroundAvailable && (
+                <p className="text-sm text-destructive">{errors.workaroundAvailable}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Customer Impact</Label>
+                <Select value={customerImpact} onValueChange={(value) => setCustomerImpact(value as 'none' | 'low' | 'medium' | 'high' | '')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select impact level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Team Impact</Label>
+                <Select value={teamImpact} onValueChange={(value) => setTeamImpact(value as 'none' | 'low' | 'medium' | 'high' | '')}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select impact level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="effort">Effort Estimate</Label>
+              <Input
+                id="effort"
+                value={effortEstimate}
+                onChange={(e) => {
+                  setEffortEstimate(sanitizeText(e.target.value));
+                  if (errors.effortEstimate) setErrors(prev => ({ ...prev, effortEstimate: '' }));
+                }}
+                placeholder="e.g., 2-3 days, 1 sprint, requires specialist knowledge..."
+                className={errors.effortEstimate ? 'border-destructive' : ''}
+              />
+              {errors.effortEstimate && (
+                <p className="text-sm text-destructive">{errors.effortEstimate}</p>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="churnRisk"
+                checked={churnRisk}
+                onCheckedChange={(checked) => setChurnRisk(checked === true)}
+              />
+              <Label htmlFor="churnRisk">Risk of customer churn due to this issue</Label>
+            </div>
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
