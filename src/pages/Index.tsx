@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle, Archive } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3 } from 'lucide-react';
 import { Issue, CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 
@@ -147,7 +147,13 @@ const Index = () => {
       description: "This will help the team understand the issue better."
     });
   };
-  const handleCreateIssue = (title: string, description: string, customerData?: CustomerData) => {
+  const handleCreateIssue = (title: string, description: string, customerData?: CustomerData, impactData?: {
+    workaroundAvailable?: string;
+    customerImpact?: 'none' | 'low' | 'medium' | 'high';
+    teamImpact?: 'none' | 'low' | 'medium' | 'high';
+    effortEstimate?: string;
+    churnRisk?: boolean;
+  }) => {
     const newIssue: Issue = {
       id: Date.now().toString(),
       title,
@@ -158,7 +164,8 @@ const Index = () => {
       updatedAt: new Date(),
       closed: false,
       votedBy: ['currentUser'],
-      customerData: customerData ? [customerData] : []
+      customerData: customerData ? [customerData] : [],
+      ...impactData
     };
     setIssues(prev => [newIssue, ...prev]);
     setVotedIssues(prev => new Set([...prev, newIssue.id]));
@@ -208,6 +215,10 @@ const Index = () => {
           <Link to="/closed" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
             <Archive className="h-4 w-4" />
             Closed Issues ({closedIssuesCount})
+          </Link>
+          <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Reports
           </Link>
         </div>
 
