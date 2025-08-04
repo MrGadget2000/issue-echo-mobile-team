@@ -84,7 +84,7 @@ const Index = () => {
   const [issues, setIssues] = useState<Issue[]>(mockIssues);
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewIssueForm, setShowNewIssueForm] = useState(false);
-  const [votedIssues, setVotedIssues] = useState<Set<string>>(new Set(['1'])); // Mock user already voted on issue 1
+  const [voteTimestamps, setVoteTimestamps] = useState<Map<string, number>>(new Map()); // Track last vote time per issue
   const {
     toast
   } = useToast();
@@ -112,13 +112,29 @@ const Index = () => {
     return [...filteredIssues].filter(issue => issue.createdAt > twoDaysAgo).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [filteredIssues]);
   const handleVote = (issueId: string) => {
-    if (votedIssues.has(issueId)) return;
+    const now = Date.now();
+    const lastVoteTime = voteTimestamps.get(issueId) || 0;
+    const timeSinceLastVote = now - lastVoteTime;
+    const cooldownPeriod = 5 * 60 * 1000; // 5 minutes in milliseconds
+    
+    if (timeSinceLastVote < cooldownPeriod) {
+      const remainingTime = Math.ceil((cooldownPeriod - timeSinceLastVote) / 1000 / 60);
+      toast({
+        title: "Vote cooldown active",
+        description: `You can vote again in ${remainingTime} minute${remainingTime !== 1 ? 's' : ''}.`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIssues(prev => prev.map(issue => issue.id === issueId ? {
       ...issue,
       votes: issue.votes + 1,
       votedBy: [...issue.votedBy, 'currentUser']
     } : issue));
-    setVotedIssues(prev => new Set([...prev, issueId]));
+    
+    setVoteTimestamps(prev => new Map(prev).set(issueId, now));
+    
     toast({
       title: "Vote recorded!",
       description: "Thanks for helping prioritize this issue."
@@ -168,7 +184,7 @@ const Index = () => {
       ...impactData
     };
     setIssues(prev => [newIssue, ...prev]);
-    setVotedIssues(prev => new Set([...prev, newIssue.id]));
+    setVoteTimestamps(prev => new Map(prev).set(newIssue.id, Date.now())); // Record initial vote timestamp
     setShowNewIssueForm(false);
     toast({
       title: "Issue created successfully!",
@@ -307,7 +323,7 @@ const Index = () => {
                   <Badge variant="secondary" className="absolute -top-2 -left-2 z-10 text-xs bg-accent text-accent-foreground">
                     NEW
                   </Badge>
-                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={votedIssues.has(issue.id)} />
+                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={false} />
                 </div>)}
             </div>
           </div>}
@@ -337,7 +353,7 @@ const Index = () => {
                   <Badge variant="secondary" className={`absolute -top-2 -left-2 z-10 text-xs ${index === 0 ? 'bg-vote text-vote-foreground' : index === 1 ? 'bg-accent text-accent-foreground' : index < 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                     #{index + 1}
                   </Badge>
-                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={votedIssues.has(issue.id)} />
+                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={false} />
                 </div>)}
             </div>}
         </div>
