@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw } from 'lucide-react';
 import { Issue } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
@@ -149,15 +150,32 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
           </Dialog>
           
           {showCloseButton && !issue.closed && onCloseIssue && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onCloseIssue(issue.id)}
-              className="flex items-center gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground ml-auto"
-            >
-              <X className="h-4 w-4" />
-              Close
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 text-destructive hover:bg-destructive hover:text-destructive-foreground ml-auto"
+                >
+                  <X className="h-4 w-4" />
+                  Close
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Close Issue</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to close this issue? This action will mark the issue as resolved.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onCloseIssue(issue.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Close Issue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
           
           {issue.closed && onReopenIssue && (
