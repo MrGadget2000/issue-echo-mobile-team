@@ -24,9 +24,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
   const [showCustomerForm, setShowCustomerForm] = useState(false);
 
   const handleVote = () => {
-    if (!hasVoted) {
-      onVote(issue.id);
-    }
+    onVote(issue.id);
   };
 
   const handleCustomerDataSubmit = (data: any) => {
@@ -117,13 +115,13 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
             variant={hasVoted ? "secondary" : "default"}
             size="sm"
             onClick={handleVote}
-            disabled={hasVoted || issue.closed}
+            disabled={issue.closed}
             className={`flex items-center gap-2 transition-bounce ${
               hasVoted ? 'bg-vote text-vote-foreground' : ''
             }`}
           >
             <ThumbsUp className={`h-4 w-4 ${hasVoted ? 'fill-current' : ''}`} />
-            {hasVoted ? 'Voted' : 'I have this issue also'}
+            {hasVoted ? 'Voted (Vote Again)' : 'I have this issue also'}
           </Button>
           
           <Dialog open={showCustomerForm} onOpenChange={setShowCustomerForm}>
