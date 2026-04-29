@@ -79,7 +79,7 @@ const Reports = () => {
       currentMonthCustomerExamples,
       monthlyData
     };
-  }, []);
+  }, [mockIssues]);
 
   const openIssuesCount = mockIssues.filter(issue => !issue.closed).length;
   const closedIssuesCount = mockIssues.filter(issue => issue.closed).length;
