@@ -240,7 +240,7 @@ const Reports = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Resolution Rate</span>
                     <span className="font-bold text-lg">
-                      {((metrics.closedIssues / mockIssues.length) * 100).toFixed(1)}%
+                      {mockIssues.length > 0 ? ((metrics.closedIssues / mockIssues.length) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
                 </div>
