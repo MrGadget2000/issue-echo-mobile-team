@@ -2,97 +2,12 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3 } from 'lucide-react';
-import { Issue } from '@/types/issue';
-
-// Mock data - in real app this would come from props or API
-const mockIssues: Issue[] = [{
-  id: '1',
-  title: 'Porting delays from Verizon to our network',
-  description: 'Customers are experiencing 3-5 day delays when porting numbers from Verizon.',
-  votes: 8,
-  createdAt: new Date('2024-01-15'),
-  updatedAt: new Date('2024-01-15'),
-  closed: false,
-  votedBy: ['user1', 'user2'],
-  customerData: [{
-    customerName: 'Sarah Johnson',
-    orderId: '12345',
-    phoneNumber: '021 123 4567',
-    serviceType: 'port-in',
-    additionalDetails: 'Customer called 3 times asking for updates.'
-  }, {
-    customerName: 'Mike Chen',
-    orderId: '67890',
-    phoneNumber: '021 987 6543',
-    serviceType: 'port-in',
-    additionalDetails: 'Business customer threatening to cancel due to delay'
-  }]
-}, {
-  id: '2',
-  title: 'SIM card activation failing for iPhone 15 Pro',
-  description: 'New iPhone 15 Pro devices are not properly activating with our SIM cards.',
-  votes: 6,
-  createdAt: new Date('2024-01-14'),
-  updatedAt: new Date('2024-01-14'),
-  closed: false,
-  votedBy: ['user3'],
-  customerData: [{
-    customerName: 'Alex Rivera',
-    orderId: '45678',
-    phoneNumber: '021 456 7890',
-    serviceType: 'new-activation',
-    additionalDetails: 'Customer purchased iPhone 15 Pro Max 256GB'
-  }]
-}, {
-  id: '3',
-  title: 'Plan change causing data throttling issues',
-  description: 'When customers upgrade their data plans, the system is not properly updating their throttling limits.',
-  votes: 4,
-  createdAt: new Date('2024-01-13'),
-  updatedAt: new Date('2024-01-13'),
-  closed: false,
-  votedBy: [],
-  customerData: []
-}, {
-  id: 'closed-1',
-  title: 'Legacy system integration timeout errors',
-  description: 'Intermittent timeout errors when integrating with legacy billing system during peak hours.',
-  votes: 12,
-  createdAt: new Date('2024-01-10'),
-  updatedAt: new Date('2024-01-12'),
-  closed: true,
-  closedAt: new Date('2024-01-12'),
-  closedBy: 'admin',
-  votedBy: ['user1', 'user2', 'user3'],
-  customerData: [{
-    customerName: 'Jennifer Smith',
-    orderId: '33210',
-    phoneNumber: '021 111 2222',
-    serviceType: 'plan-change',
-    additionalDetails: 'System timed out during plan upgrade, customer charged twice'
-  }]
-}, {
-  id: 'closed-2',
-  title: 'Network outage affecting East Auckland',
-  description: 'Planned maintenance caused extended outage in East Auckland region.',
-  votes: 15,
-  createdAt: new Date('2023-12-20'),
-  updatedAt: new Date('2023-12-22'),
-  closed: true,
-  closedAt: new Date('2023-12-22'),
-  closedBy: 'admin',
-  votedBy: ['user1', 'user2', 'user3', 'user4'],
-  customerData: [{
-    customerName: 'Emma Wilson',
-    orderId: '99887',
-    phoneNumber: '021 555 1234',
-    serviceType: 'other',
-    additionalDetails: 'Business customer, lost revenue during outage'
-  }]
-}];
+import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2 } from 'lucide-react';
+import { useIssues } from '@/hooks/useIssues';
 
 const Reports = () => {
+  const { issues: mockIssues, loading } = useIssues();
+
   // Calculate metrics
   const metrics = useMemo(() => {
     const now = new Date();
