@@ -274,7 +274,7 @@ const Reports = () => {
                   <div className="flex justify-between items-center">
                     <span className="font-medium">Coverage Rate</span>
                     <span className="font-bold text-lg">
-                      {((mockIssues.filter(issue => issue.customerData.length > 0).length / mockIssues.length) * 100).toFixed(1)}%
+                      {mockIssues.length > 0 ? ((mockIssues.filter(issue => issue.customerData.length > 0).length / mockIssues.length) * 100).toFixed(1) : '0.0'}%
                     </span>
                   </div>
                 </div>
