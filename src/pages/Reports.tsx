@@ -267,7 +267,7 @@ const Reports = () => {
                 <div className="flex justify-between items-center">
                   <span>Avg Examples per Issue</span>
                   <span className="font-bold">
-                    {(metrics.totalCustomerExamples / mockIssues.length).toFixed(1)}
+                    {mockIssues.length > 0 ? (metrics.totalCustomerExamples / mockIssues.length).toFixed(1) : '0.0'}
                   </span>
                 </div>
                 <div className="pt-2 border-t">
