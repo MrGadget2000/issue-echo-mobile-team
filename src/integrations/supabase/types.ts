@@ -14,7 +14,127 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customer_examples: {
+        Row: {
+          additional_details: string | null
+          created_at: string
+          customer_name: string | null
+          id: string
+          issue_id: string
+          order_id: string | null
+          phone_number: string | null
+          service_type: string | null
+        }
+        Insert: {
+          additional_details?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          issue_id: string
+          order_id?: string | null
+          phone_number?: string | null
+          service_type?: string | null
+        }
+        Update: {
+          additional_details?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          issue_id?: string
+          order_id?: string | null
+          phone_number?: string | null
+          service_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_examples_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issue_votes: {
+        Row: {
+          created_at: string
+          id: string
+          issue_id: string
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issue_id: string
+          voter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issue_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_votes_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      issues: {
+        Row: {
+          churn_risk: boolean | null
+          closed: boolean
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          customer_impact: string | null
+          description: string
+          effort_estimate: string | null
+          id: string
+          team_impact: string | null
+          title: string
+          updated_at: string
+          votes: number
+          workaround_available: string | null
+        }
+        Insert: {
+          churn_risk?: boolean | null
+          closed?: boolean
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          customer_impact?: string | null
+          description: string
+          effort_estimate?: string | null
+          id?: string
+          team_impact?: string | null
+          title: string
+          updated_at?: string
+          votes?: number
+          workaround_available?: string | null
+        }
+        Update: {
+          churn_risk?: boolean | null
+          closed?: boolean
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          customer_impact?: string | null
+          description?: string
+          effort_estimate?: string | null
+          id?: string
+          team_impact?: string | null
+          title?: string
+          updated_at?: string
+          votes?: number
+          workaround_available?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
