@@ -6,15 +6,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2 } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut } from 'lucide-react';
 import { CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewIssueForm, setShowNewIssueForm] = useState(false);
   const { toast } = useToast();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const {
     issues,
     loading,
@@ -24,6 +26,13 @@ const Index = () => {
     closeIssue,
     hasVoted,
   } = useIssues();
+
+  const handleSignIn = async () => {
+    const result = await signInWithGoogle();
+    if (result?.error) {
+      toast({ title: 'Sign-in failed', description: result.error.message, variant: 'destructive' });
+    }
+  };
 
   const filteredIssues = useMemo(() => {
     return issues
@@ -55,6 +64,10 @@ const Index = () => {
   }, [filteredIssues]);
 
   const handleVote = async (issueId: string) => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Please sign in with Google to vote.', variant: 'destructive' });
+      return;
+    }
     const result = await voteIssue(issueId);
     if (!result.ok && result.remainingMinutes !== undefined) {
       toast({
@@ -127,6 +140,20 @@ const Index = () => {
                 <div className="text-2xl font-bold">{totalVotes}</div>
                 <div className="text-sm text-primary-foreground/80">Total Votes</div>
               </div>
+              {user ? (
+                <div className="flex items-center gap-2 ml-4">
+                  <span className="text-sm text-primary-foreground/90 hidden sm:inline">{user.email}</span>
+                  <Button size="sm" variant="secondary" onClick={signOut}>
+                    <LogOut className="h-4 w-4 mr-1" />
+                    Sign out
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={handleSignIn} className="ml-4">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign in with Google
+                </Button>
+              )}
             </div>
           </div>
         </div>
