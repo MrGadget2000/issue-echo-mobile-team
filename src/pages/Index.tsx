@@ -64,6 +64,10 @@ const Index = () => {
   }, [filteredIssues]);
 
   const handleVote = async (issueId: string) => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Please sign in with Google to vote.', variant: 'destructive' });
+      return;
+    }
     const result = await voteIssue(issueId);
     if (!result.ok && result.remainingMinutes !== undefined) {
       toast({
