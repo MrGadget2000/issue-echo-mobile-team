@@ -140,6 +140,20 @@ const Index = () => {
                 <div className="text-2xl font-bold">{totalVotes}</div>
                 <div className="text-sm text-primary-foreground/80">Total Votes</div>
               </div>
+              {user ? (
+                <div className="flex items-center gap-2 ml-4">
+                  <span className="text-sm text-primary-foreground/90 hidden sm:inline">{user.email}</span>
+                  <Button size="sm" variant="secondary" onClick={signOut}>
+                    <LogOut className="h-4 w-4 mr-1" />
+                    Sign out
+                  </Button>
+                </div>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={handleSignIn} className="ml-4">
+                  <LogIn className="h-4 w-4 mr-1" />
+                  Sign in with Google
+                </Button>
+              )}
             </div>
           </div>
         </div>
