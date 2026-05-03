@@ -6,10 +6,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2 } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut } from 'lucide-react';
 import { CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
+import { useAuth } from '@/hooks/useAuth';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
