@@ -16,6 +16,7 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewIssueForm, setShowNewIssueForm] = useState(false);
   const { toast } = useToast();
+  const { user, signInWithGoogle, signOut } = useAuth();
   const {
     issues,
     loading,
@@ -25,6 +26,13 @@ const Index = () => {
     closeIssue,
     hasVoted,
   } = useIssues();
+
+  const handleSignIn = async () => {
+    const result = await signInWithGoogle();
+    if (result?.error) {
+      toast({ title: 'Sign-in failed', description: result.error.message, variant: 'destructive' });
+    }
+  };
 
   const filteredIssues = useMemo(() => {
     return issues
