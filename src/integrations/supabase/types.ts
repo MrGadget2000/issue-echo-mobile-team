@@ -60,18 +60,21 @@ export type Database = {
           created_at: string
           id: string
           issue_id: string
+          user_id: string | null
           voter_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           issue_id: string
+          user_id?: string | null
           voter_id: string
         }
         Update: {
           created_at?: string
           id?: string
           issue_id?: string
+          user_id?: string | null
           voter_id?: string
         }
         Relationships: [
@@ -91,6 +94,7 @@ export type Database = {
           closed_at: string | null
           closed_by: string | null
           created_at: string
+          created_by: string | null
           customer_impact: string | null
           description: string
           effort_estimate: string | null
@@ -107,6 +111,7 @@ export type Database = {
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
+          created_by?: string | null
           customer_impact?: string | null
           description: string
           effort_estimate?: string | null
@@ -123,6 +128,7 @@ export type Database = {
           closed_at?: string | null
           closed_by?: string | null
           created_at?: string
+          created_by?: string | null
           customer_impact?: string | null
           description?: string
           effort_estimate?: string | null
@@ -132,6 +138,36 @@ export type Database = {
           updated_at?: string
           votes?: number
           workaround_available?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -182,7 +182,13 @@ const Index = () => {
             </div>
           </div>
 
-          <Dialog open={showNewIssueForm} onOpenChange={setShowNewIssueForm}>
+          <Dialog open={showNewIssueForm} onOpenChange={(open) => {
+            if (open && !user) {
+              toast({ title: 'Sign in required', description: 'Please sign in with Google to report an issue.', variant: 'destructive' });
+              return;
+            }
+            setShowNewIssueForm(open);
+          }}>
             <DialogTrigger asChild>
               <Button className="bg-gradient-primary shadow-card">
                 <Plus className="h-4 w-4 mr-2" />
