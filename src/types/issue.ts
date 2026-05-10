@@ -23,4 +23,13 @@ export interface Issue {
   teamImpact?: 'none' | 'low' | 'medium' | 'high';
   effortEstimate?: string;
   churnRisk?: boolean;
+  createdBy?: string;
+  createdByProfile?: UserProfile;
+}
+
+export interface UserProfile {
+  userId: string;
+  displayName?: string;
+  avatarUrl?: string;
+  email?: string;
 }
