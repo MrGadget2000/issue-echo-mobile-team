@@ -81,6 +81,32 @@ const Reports = () => {
     };
   }, [mockIssues]);
 
+  // Top reporters: count issues created per user
+  const topReporters = useMemo(() => {
+    const counts = new Map<string, { count: number; displayName: string; avatarUrl?: string; email?: string }>();
+    mockIssues.forEach((issue) => {
+      if (!issue.createdBy) return;
+      const profile = issue.createdByProfile;
+      const existing = counts.get(issue.createdBy);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(issue.createdBy, {
+          count: 1,
+          displayName: profile?.displayName ?? profile?.email ?? 'Unknown user',
+          avatarUrl: profile?.avatarUrl,
+          email: profile?.email,
+        });
+      }
+    });
+    return Array.from(counts.values()).sort((a, b) => b.count - a.count).slice(0, 10);
+  }, [mockIssues]);
+
+  const unattributedCount = useMemo(
+    () => mockIssues.filter((i) => !i.createdBy).length,
+    [mockIssues]
+  );
+
   const openIssuesCount = mockIssues.filter(issue => !issue.closed).length;
   const closedIssuesCount = mockIssues.filter(issue => issue.closed).length;
 
