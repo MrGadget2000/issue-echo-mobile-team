@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2 } from 'lucide-react';
+import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2, UserCircle2 } from 'lucide-react';
 import { useIssues } from '@/hooks/useIssues';
 
 const Reports = () => {
