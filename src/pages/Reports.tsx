@@ -315,6 +315,52 @@ const Reports = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Top Reporters */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCircle2 className="h-5 w-5" />
+              Top Reporters
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topReporters.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No attributed reports yet. Sign in and report an issue to appear here.</p>
+            ) : (
+              <div className="space-y-3">
+                {topReporters.map((reporter, idx) => (
+                  <div key={reporter.email ?? idx} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="w-8 justify-center">#{idx + 1}</Badge>
+                      {reporter.avatarUrl ? (
+                        <img src={reporter.avatarUrl} alt={reporter.displayName} className="h-8 w-8 rounded-full" />
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                          {reporter.displayName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium text-sm">{reporter.displayName}</div>
+                        {reporter.email && reporter.email !== reporter.displayName && (
+                          <div className="text-xs text-muted-foreground">{reporter.email}</div>
+                        )}
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                      {reporter.count} {reporter.count === 1 ? 'issue' : 'issues'}
+                    </Badge>
+                  </div>
+                ))}
+                {unattributedCount > 0 && (
+                  <p className="text-xs text-muted-foreground pt-2">
+                    {unattributedCount} legacy {unattributedCount === 1 ? 'issue is' : 'issues are'} not attributed to a user (created before sign-in was required).
+                  </p>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
