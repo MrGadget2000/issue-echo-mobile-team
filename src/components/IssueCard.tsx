@@ -65,7 +65,26 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
       
       <CardContent className="space-y-4">
         <p className="text-muted-foreground leading-relaxed">{sanitizeHtml(issue.description)}</p>
-        
+
+        {issue.createdByProfile && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            {issue.createdByProfile.avatarUrl ? (
+              <img
+                src={issue.createdByProfile.avatarUrl}
+                alt={issue.createdByProfile.displayName ?? 'Reporter'}
+                className="h-5 w-5 rounded-full"
+              />
+            ) : (
+              <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] font-medium">
+                {(issue.createdByProfile.displayName ?? issue.createdByProfile.email ?? '?').charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span>
+              Reported by {issue.createdByProfile.displayName ?? issue.createdByProfile.email ?? 'Unknown'}
+            </span>
+          </div>
+        )}
+
         {issue.customerData.length > 0 && (
           <div className="space-y-2">
             <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
