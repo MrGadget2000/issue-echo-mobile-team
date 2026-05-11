@@ -11,12 +11,14 @@ import { CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showNewIssueForm, setShowNewIssueForm] = useState(false);
   const { toast } = useToast();
   const { user, signInWithGoogle, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const {
     issues,
     loading,

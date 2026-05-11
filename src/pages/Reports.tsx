@@ -420,6 +420,10 @@ const Reports = () => {
             )}
           </CardContent>
         </Card>
+
+        <div className="mt-6">
+          <AdminPanel currentUserId={user!.id} onChange={refreshRole} />
+        </div>
       </div>
     </div>
   );
