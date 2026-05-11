@@ -6,6 +6,7 @@ import { IssueCard } from '@/components/IssueCard';
 import { Search, Archive, ArrowLeft, BarChart3, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
+import { useUserRole } from '@/hooks/useUserRole';
 
 const ClosedIssues = () => {
   const [searchTerm, setSearchTerm] = useState('');

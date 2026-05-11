@@ -170,10 +170,12 @@ const Index = () => {
             <Archive className="h-4 w-4" />
             Closed Issues ({closedIssuesCount})
           </Link>
-          <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </Link>
+          {isAdmin && (
+            <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
