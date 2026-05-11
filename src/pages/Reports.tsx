@@ -1,12 +1,71 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2, UserCircle2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock } from 'lucide-react';
 import { useIssues } from '@/hooks/useIssues';
+import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
+import { AdminPanel } from '@/components/AdminPanel';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const Reports = () => {
   const { issues: mockIssues, loading } = useIssues();
+  const { user, loading: authLoading, signInWithGoogle } = useAuth();
+  const { isAdmin, anyAdminExists, loading: roleLoading, refresh: refreshRole } = useUserRole();
+  const { toast } = useToast();
+
+  const claimFirstAdmin = async () => {
+    const { data, error } = await supabase.rpc('claim_first_admin');
+    if (error || !data) {
+      toast({ title: 'Could not claim admin', description: error?.message ?? 'An admin already exists.', variant: 'destructive' });
+      return;
+    }
+    toast({ title: 'You are now an admin' });
+    refreshRole();
+  };
+
+  if (authLoading || roleLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin mr-2" /> Loading…
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="max-w-md w-full bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" /> Admins only
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              The Reports tab is restricted to admin users.
+            </p>
+            {!user ? (
+              <Button onClick={signInWithGoogle} className="w-full">Sign in with Google</Button>
+            ) : anyAdminExists === false ? (
+              <>
+                <p className="text-sm">No admin has been set up yet. Claim the first admin role to bootstrap your team.</p>
+                <Button onClick={claimFirstAdmin} className="w-full">
+                  <Shield className="h-4 w-4 mr-2" /> Claim first admin
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm">Ask an existing admin to grant you access.</p>
+            )}
+            <Link to="/" className="block text-sm text-primary hover:underline text-center">← Back to issues</Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Calculate metrics
   const metrics = useMemo(() => {
