@@ -12,6 +12,7 @@ const ClosedIssues = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
   const { issues, loading, reopenIssue } = useIssues();
+  const { isAdmin } = useUserRole();
 
   const closedIssues = useMemo(() => issues.filter((i) => i.closed), [issues]);
 
@@ -74,10 +75,12 @@ const ClosedIssues = () => {
             <Archive className="h-4 w-4" />
             Closed Issues
           </span>
-          <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Reports
-          </Link>
+          {isAdmin && (
+            <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Reports
+            </Link>
+          )}
         </div>
 
         <div className="mb-8">
