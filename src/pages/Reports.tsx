@@ -27,6 +27,98 @@ const Reports = () => {
     refreshRole();
   };
 
+  // Calculate metrics (hooks must run unconditionally)
+  const metrics = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const currentMonthIssues = mockIssues.filter(issue => {
+      const issueDate = new Date(issue.createdAt);
+      return issueDate.getMonth() === currentMonth && issueDate.getFullYear() === currentYear;
+    });
+
+    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    const prevMonthIssues = mockIssues.filter(issue => {
+      const issueDate = new Date(issue.createdAt);
+      return issueDate.getMonth() === prevMonth && issueDate.getFullYear() === prevYear;
+    });
+
+    const openIssues = mockIssues.filter(issue => !issue.closed);
+    const closedIssues = mockIssues.filter(issue => issue.closed);
+
+    const averageAge = openIssues.length > 0
+      ? Math.round(openIssues.reduce((sum, issue) => {
+          const ageInDays = Math.floor((now.getTime() - issue.createdAt.getTime()) / (1000 * 60 * 60 * 24));
+          return sum + ageInDays;
+        }, 0) / openIssues.length)
+      : 0;
+
+    const totalCustomerExamples = mockIssues.reduce((sum, issue) => sum + issue.customerData.length, 0);
+    const currentMonthCustomerExamples = currentMonthIssues.reduce((sum, issue) => sum + issue.customerData.length, 0);
+
+    const monthlyData = [];
+    for (let i = 5; i >= 0; i--) {
+      const targetMonth = (currentMonth - i + 12) % 12;
+      const targetYear = currentMonth - i < 0 ? currentYear - 1 : currentYear;
+
+      const monthIssues = mockIssues.filter(issue => {
+        const issueDate = new Date(issue.createdAt);
+        return issueDate.getMonth() === targetMonth && issueDate.getFullYear() === targetYear;
+      });
+
+      const monthClosed = monthIssues.filter(issue => {
+        if (!issue.closedAt) return false;
+        const closedDate = new Date(issue.closedAt);
+        return closedDate.getMonth() === targetMonth && closedDate.getFullYear() === targetYear;
+      });
+
+      monthlyData.push({
+        month: new Date(targetYear, targetMonth).toLocaleDateString('en-NZ', { month: 'short', year: 'numeric' }),
+        raised: monthIssues.length,
+        resolved: monthClosed.length,
+        customerExamples: monthIssues.reduce((sum, issue) => sum + issue.customerData.length, 0)
+      });
+    }
+
+    return {
+      currentMonthIssues: currentMonthIssues.length,
+      prevMonthIssues: prevMonthIssues.length,
+      openIssues: openIssues.length,
+      closedIssues: closedIssues.length,
+      averageAge,
+      totalCustomerExamples,
+      currentMonthCustomerExamples,
+      monthlyData
+    };
+  }, [mockIssues]);
+
+  const topReporters = useMemo(() => {
+    const counts = new Map<string, { count: number; displayName: string; avatarUrl?: string; email?: string }>();
+    mockIssues.forEach((issue) => {
+      if (!issue.createdBy) return;
+      const profile = issue.createdByProfile;
+      const existing = counts.get(issue.createdBy);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        counts.set(issue.createdBy, {
+          count: 1,
+          displayName: profile?.displayName ?? profile?.email ?? 'Unknown user',
+          avatarUrl: profile?.avatarUrl,
+          email: profile?.email,
+        });
+      }
+    });
+    return Array.from(counts.values()).sort((a, b) => b.count - a.count).slice(0, 10);
+  }, [mockIssues]);
+
+  const unattributedCount = useMemo(
+    () => mockIssues.filter((i) => !i.createdBy).length,
+    [mockIssues]
+  );
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
