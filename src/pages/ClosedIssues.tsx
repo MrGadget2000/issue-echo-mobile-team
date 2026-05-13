@@ -11,7 +11,16 @@ import { useUserRole } from '@/hooks/useUserRole';
 const ClosedIssues = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  const { issues, loading, reopenIssue } = useIssues();
+  const { issues, loading, reopenIssue, deleteIssue } = useIssues();
+
+  const handleDeleteIssue = async (issueId: string) => {
+    try {
+      await deleteIssue(issueId);
+      toast({ title: 'Issue deleted', description: 'The issue and all related data have been permanently removed.' });
+    } catch (e: any) {
+      toast({ title: 'Failed to delete issue', description: e?.message ?? 'Please try again.', variant: 'destructive' });
+    }
+  };
   const { isAdmin } = useUserRole();
 
   const closedIssues = useMemo(() => issues.filter((i) => i.closed), [issues]);
@@ -122,6 +131,8 @@ const ClosedIssues = () => {
                   onVote={handleVote}
                   onAddCustomerData={handleAddCustomerData}
                   onReopenIssue={handleReopenIssue}
+                  onDeleteIssue={handleDeleteIssue}
+                  isAdmin={isAdmin}
                   hasVoted={false}
                   showCloseButton={false}
                 />

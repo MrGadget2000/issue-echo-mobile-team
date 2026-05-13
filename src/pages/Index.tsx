@@ -26,8 +26,18 @@ const Index = () => {
     voteIssue,
     addCustomerData,
     closeIssue,
+    deleteIssue,
     hasVoted,
   } = useIssues();
+
+  const handleDeleteIssue = async (issueId: string) => {
+    try {
+      await deleteIssue(issueId);
+      toast({ title: 'Issue deleted', description: 'The issue and all related data have been permanently removed.' });
+    } catch (e: any) {
+      toast({ title: 'Failed to delete issue', description: e?.message ?? 'Please try again.', variant: 'destructive' });
+    }
+  };
 
   const handleSignIn = async () => {
     const result = await signInWithGoogle();
@@ -277,7 +287,7 @@ const Index = () => {
                   <Badge variant="secondary" className="absolute -top-2 -left-2 z-10 text-xs bg-accent text-accent-foreground">
                     NEW
                   </Badge>
-                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={hasVoted(issue.id)} />
+                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} onDeleteIssue={handleDeleteIssue} isAdmin={isAdmin} hasVoted={hasVoted(issue.id)} />
                 </div>
               ))}
             </div>
@@ -326,7 +336,7 @@ const Index = () => {
                     >
                       #{index + 1}
                     </Badge>
-                    <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={hasVoted(issue.id)} />
+                    <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} onDeleteIssue={handleDeleteIssue} isAdmin={isAdmin} hasVoted={hasVoted(issue.id)} />
                   </div>
                 ))}
               </div>

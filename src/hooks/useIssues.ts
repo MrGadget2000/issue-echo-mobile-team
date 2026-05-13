@@ -247,6 +247,20 @@ export function useIssues() {
     );
   }, []);
 
+  const deleteIssue = useCallback(async (issueId: string) => {
+    // Delete dependent rows first (no ON DELETE CASCADE configured)
+    await supabase.from('customer_examples').delete().eq('issue_id', issueId);
+    await supabase.from('issue_votes').delete().eq('issue_id', issueId);
+    const { error } = await supabase.from('issues').delete().eq('id', issueId);
+    if (error) throw error;
+    setIssues((prev) => prev.filter((i) => i.id !== issueId));
+    setVoteTimestamps((prev) => {
+      const next = new Map(prev);
+      next.delete(issueId);
+      return next;
+    });
+  }, []);
+
   const hasVoted = useCallback((issueId: string) => voteTimestamps.has(issueId), [voteTimestamps]);
 
   const cooldownRemaining = useCallback((issueId: string): number => {
@@ -263,6 +277,7 @@ export function useIssues() {
     addCustomerData,
     closeIssue,
     reopenIssue,
+    deleteIssue,
     hasVoted,
     cooldownRemaining,
     refresh: loadAll,
