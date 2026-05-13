@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -118,6 +119,33 @@ const Reports = () => {
     () => mockIssues.filter((i) => !i.createdBy).length,
     [mockIssues]
   );
+
+  const dailyActivity = useMemo(() => {
+    const days: { date: string; label: string; count: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets = new Map<string, number>();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      buckets.set(key, 0);
+      days.push({
+        date: key,
+        label: d.toLocaleDateString('en-NZ', { month: 'short', day: 'numeric' }),
+        count: 0,
+      });
+    }
+    mockIssues.forEach((issue) => {
+      const d = new Date(issue.createdAt);
+      d.setHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+      if (buckets.has(key)) {
+        buckets.set(key, (buckets.get(key) ?? 0) + 1 + issue.customerData.length);
+      }
+    });
+    return days.map((d) => ({ ...d, count: buckets.get(d.date) ?? 0 }));
+  }, [mockIssues]);
 
   if (authLoading || roleLoading) {
     return (
@@ -264,6 +292,44 @@ const Reports = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Daily Activity (last 30 days) */}
+        <Card className="mb-8 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Last 30 Days — Issues + Examples per Day
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dailyActivity} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    interval={Math.floor(dailyActivity.length / 10)}
+                  />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(value: number) => [value, 'Items']}
+                  />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Each issue counts as 1, plus 1 for every customer example attached.
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Monthly Trend */}
         <Card className="mb-8 bg-gradient-card shadow-card">
