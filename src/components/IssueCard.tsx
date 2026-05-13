@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw } from 'lucide-react';
+import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
 import { Issue } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
 import { formatDistanceToNow } from 'date-fns';
@@ -16,12 +18,16 @@ interface IssueCardProps {
   onAddCustomerData: (issueId: string, customerData: any) => void;
   onCloseIssue?: (issueId: string) => void;
   onReopenIssue?: (issueId: string) => void;
+  onDeleteIssue?: (issueId: string) => void;
   hasVoted: boolean;
   showCloseButton?: boolean;
+  isAdmin?: boolean;
 }
 
-export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, hasVoted, showCloseButton = true }: IssueCardProps) {
+export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, onDeleteIssue, hasVoted, showCloseButton = true, isAdmin = false }: IssueCardProps) {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const handleVote = () => {
     onVote(issue.id);
