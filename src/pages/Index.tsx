@@ -26,8 +26,18 @@ const Index = () => {
     voteIssue,
     addCustomerData,
     closeIssue,
+    deleteIssue,
     hasVoted,
   } = useIssues();
+
+  const handleDeleteIssue = async (issueId: string) => {
+    try {
+      await deleteIssue(issueId);
+      toast({ title: 'Issue deleted', description: 'The issue and all related data have been permanently removed.' });
+    } catch (e: any) {
+      toast({ title: 'Failed to delete issue', description: e?.message ?? 'Please try again.', variant: 'destructive' });
+    }
+  };
 
   const handleSignIn = async () => {
     const result = await signInWithGoogle();
