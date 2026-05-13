@@ -336,7 +336,7 @@ const Index = () => {
                     >
                       #{index + 1}
                     </Badge>
-                    <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={hasVoted(issue.id)} />
+                    <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} onDeleteIssue={handleDeleteIssue} isAdmin={isAdmin} hasVoted={hasVoted(issue.id)} />
                   </div>
                 ))}
               </div>
