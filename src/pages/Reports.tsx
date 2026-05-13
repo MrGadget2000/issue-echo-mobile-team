@@ -120,6 +120,33 @@ const Reports = () => {
     [mockIssues]
   );
 
+  const dailyActivity = useMemo(() => {
+    const days: { date: string; label: string; count: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const buckets = new Map<string, number>();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      buckets.set(key, 0);
+      days.push({
+        date: key,
+        label: d.toLocaleDateString('en-NZ', { month: 'short', day: 'numeric' }),
+        count: 0,
+      });
+    }
+    mockIssues.forEach((issue) => {
+      const d = new Date(issue.createdAt);
+      d.setHours(0, 0, 0, 0);
+      const key = d.toISOString().slice(0, 10);
+      if (buckets.has(key)) {
+        buckets.set(key, (buckets.get(key) ?? 0) + 1 + issue.customerData.length);
+      }
+    });
+    return days.map((d) => ({ ...d, count: buckets.get(d.date) ?? 0 }));
+  }, [mockIssues]);
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">
