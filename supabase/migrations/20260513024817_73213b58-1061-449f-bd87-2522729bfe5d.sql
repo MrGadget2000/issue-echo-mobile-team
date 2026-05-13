@@ -1,0 +1,3 @@
+CREATE POLICY "Admins can delete issues" ON public.issues FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins can delete customer examples" ON public.customer_examples FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
+CREATE POLICY "Admins can delete votes" ON public.issue_votes FOR DELETE TO authenticated USING (public.has_role(auth.uid(), 'admin'));
