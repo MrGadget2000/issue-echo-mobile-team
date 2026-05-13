@@ -131,6 +131,8 @@ const ClosedIssues = () => {
                   onVote={handleVote}
                   onAddCustomerData={handleAddCustomerData}
                   onReopenIssue={handleReopenIssue}
+                  onDeleteIssue={handleDeleteIssue}
+                  isAdmin={isAdmin}
                   hasVoted={false}
                   showCloseButton={false}
                 />
