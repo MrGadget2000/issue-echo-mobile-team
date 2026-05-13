@@ -293,6 +293,44 @@ const Reports = () => {
           </Card>
         </div>
 
+        {/* Daily Activity (last 30 days) */}
+        <Card className="mb-8 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Last 30 Days — Issues + Examples per Day
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={dailyActivity} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    interval={Math.floor(dailyActivity.length / 10)}
+                  />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--background))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(value: number) => [value, 'Items']}
+                  />
+                  <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Each issue counts as 1, plus 1 for every customer example attached.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Monthly Trend */}
         <Card className="mb-8 bg-gradient-card shadow-card">
           <CardHeader>
