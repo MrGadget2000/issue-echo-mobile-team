@@ -277,6 +277,7 @@ export function useIssues() {
     addCustomerData,
     closeIssue,
     reopenIssue,
+    deleteIssue,
     hasVoted,
     cooldownRemaining,
     refresh: loadAll,
