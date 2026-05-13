@@ -287,7 +287,7 @@ const Index = () => {
                   <Badge variant="secondary" className="absolute -top-2 -left-2 z-10 text-xs bg-accent text-accent-foreground">
                     NEW
                   </Badge>
-                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} hasVoted={hasVoted(issue.id)} />
+                  <IssueCard issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} onDeleteIssue={handleDeleteIssue} isAdmin={isAdmin} hasVoted={hasVoted(issue.id)} />
                 </div>
               ))}
             </div>
