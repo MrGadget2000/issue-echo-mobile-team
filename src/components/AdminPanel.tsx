@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, UserPlus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-interface AdminRow {
+interface ProfileRow {
   user_id: string;
   display_name?: string | null;
   email?: string | null;
@@ -16,41 +16,40 @@ interface AdminRow {
 
 export function AdminPanel({ currentUserId, onChange }: { currentUserId: string; onChange?: () => void }) {
   const { toast } = useToast();
-  const [admins, setAdmins] = useState<AdminRow[]>([]);
+  const [admins, setAdmins] = useState<ProfileRow[]>([]);
+  const [nonAdmins, setNonAdmins] = useState<ProfileRow[]>([]);
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const { data: roles } = await supabase
-      .from('user_roles')
-      .select('user_id')
-      .eq('role', 'admin');
-    const ids = (roles ?? []).map((r: any) => r.user_id);
-    if (ids.length === 0) {
-      setAdmins([]);
-      return;
-    }
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('user_id, display_name, email, avatar_url')
-      .in('user_id', ids);
-    setAdmins((profiles ?? []) as AdminRow[]);
+    const [{ data: roles }, { data: profiles }] = await Promise.all([
+      supabase.from('user_roles').select('user_id').eq('role', 'admin'),
+      supabase.from('profiles').select('user_id, display_name, email, avatar_url'),
+    ]);
+    const adminIds = new Set((roles ?? []).map((r: any) => r.user_id));
+    const all = (profiles ?? []) as ProfileRow[];
+    setAdmins(all.filter((p) => adminIds.has(p.user_id)));
+    setNonAdmins(
+      all
+        .filter((p) => !adminIds.has(p.user_id))
+        .sort((a, b) => (a.display_name ?? a.email ?? '').localeCompare(b.display_name ?? b.email ?? ''))
+    );
   };
 
   useEffect(() => {
     load();
   }, []);
 
-  const grant = async () => {
-    if (!email.trim()) return;
+  const grantByEmail = async (target: string) => {
+    if (!target.trim()) return;
     setBusy(true);
-    const { error } = await supabase.rpc('grant_admin_by_email', { _email: email.trim() });
+    const { error } = await supabase.rpc('grant_admin_by_email', { _email: target.trim() });
     setBusy(false);
     if (error) {
       toast({ title: 'Could not grant admin', description: error.message, variant: 'destructive' });
       return;
     }
-    toast({ title: 'Admin granted', description: `${email.trim()} is now an admin.` });
+    toast({ title: 'Admin granted', description: `${target.trim()} is now an admin.` });
     setEmail('');
     await load();
     onChange?.();
@@ -77,52 +76,95 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
           Admin Management
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex gap-2">
-          <Input
-            placeholder="teammate@company.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            type="email"
-          />
-          <Button onClick={grant} disabled={busy || !email.trim()}>
-            <UserPlus className="h-4 w-4 mr-1" />
-            Make admin
-          </Button>
+      <CardContent className="space-y-6">
+        <div>
+          <div className="flex gap-2">
+            <Input
+              placeholder="teammate@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+            />
+            <Button onClick={() => grantByEmail(email)} disabled={busy || !email.trim()}>
+              <UserPlus className="h-4 w-4 mr-1" />
+              Make admin
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            The user must have signed in at least once before you can promote them.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          The user must have signed in at least once before you can promote them.
-        </p>
 
-        <div className="space-y-2">
-          {admins.map((a) => (
-            <div key={a.user_id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-              <div className="flex items-center gap-3">
-                {a.avatar_url ? (
-                  <img src={a.avatar_url} alt={a.display_name ?? ''} className="h-8 w-8 rounded-full" />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
-                    {(a.display_name ?? a.email ?? '?').charAt(0).toUpperCase()}
+        <div>
+          <h3 className="text-sm font-semibold mb-2">Current admins ({admins.length})</h3>
+          <div className="space-y-2">
+            {admins.map((a) => (
+              <div key={a.user_id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-3">
+                  {a.avatar_url ? (
+                    <img src={a.avatar_url} alt={a.display_name ?? ''} className="h-8 w-8 rounded-full" />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                      {(a.display_name ?? a.email ?? '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <div className="font-medium text-sm">{a.display_name ?? a.email}</div>
+                    {a.email && a.email !== a.display_name && (
+                      <div className="text-xs text-muted-foreground">{a.email}</div>
+                    )}
                   </div>
-                )}
-                <div>
-                  <div className="font-medium text-sm">{a.display_name ?? a.email}</div>
-                  {a.email && a.email !== a.display_name && (
-                    <div className="text-xs text-muted-foreground">{a.email}</div>
+                  {a.user_id === currentUserId && (
+                    <Badge variant="outline" className="ml-2">You</Badge>
                   )}
                 </div>
-                {a.user_id === currentUserId && (
-                  <Badge variant="outline" className="ml-2">You</Badge>
+                {a.user_id !== currentUserId && (
+                  <Button variant="ghost" size="sm" onClick={() => revoke(a.user_id)} disabled={busy}>
+                    <X className="h-4 w-4 mr-1" />
+                    Remove
+                  </Button>
                 )}
               </div>
-              {a.user_id !== currentUserId && (
-                <Button variant="ghost" size="sm" onClick={() => revoke(a.user_id)} disabled={busy}>
-                  <X className="h-4 w-4 mr-1" />
-                  Remove
-                </Button>
-              )}
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-2">Signed-in users ({nonAdmins.length})</h3>
+          {nonAdmins.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No other users have signed in yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {nonAdmins.map((u) => (
+                <div key={u.user_id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt={u.display_name ?? ''} className="h-8 w-8 rounded-full" />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                        {(u.display_name ?? u.email ?? '?').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-medium text-sm">{u.display_name ?? u.email}</div>
+                      {u.email && u.email !== u.display_name && (
+                        <div className="text-xs text-muted-foreground">{u.email}</div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => u.email && grantByEmail(u.email)}
+                    disabled={busy || !u.email}
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Promote
+                  </Button>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       </CardContent>
     </Card>
