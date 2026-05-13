@@ -212,6 +212,81 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
               Reopen
             </Button>
           )}
+
+          {isAdmin && onDeleteIssue && (
+            <AlertDialog
+              open={deleteOpen}
+              onOpenChange={(open) => {
+                setDeleteOpen(open);
+                if (!open) setDeleteConfirmText('');
+              }}
+            >
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="flex items-center gap-2 ml-2"
+                  title="Admin: permanently delete this issue"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-5 w-5" />
+                    Permanently delete this issue?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription asChild>
+                    <div className="space-y-3 text-sm">
+                      <p className="font-semibold text-destructive">
+                        This action is irreversible. The issue cannot be recovered.
+                      </p>
+                      <p>
+                        This will permanently remove:
+                      </p>
+                      <ul className="list-disc pl-5 space-y-1">
+                        <li>The issue <strong>"{issue.title}"</strong></li>
+                        <li>All <strong>{issue.votes}</strong> vote{issue.votes !== 1 ? 's' : ''} cast by the team</li>
+                        <li>All <strong>{issue.customerData.length}</strong> customer example{issue.customerData.length !== 1 ? 's' : ''} attached</li>
+                      </ul>
+                      <p className="text-muted-foreground">
+                        Use this <strong>only for test or junk issues</strong>. To resolve a real issue, close it instead so it stays in the historical record.
+                      </p>
+                      <div className="pt-2">
+                        <Label htmlFor={`confirm-${issue.id}`} className="text-foreground">
+                          Type <span className="font-mono font-bold">DELETE</span> to confirm:
+                        </Label>
+                        <Input
+                          id={`confirm-${issue.id}`}
+                          value={deleteConfirmText}
+                          onChange={(e) => setDeleteConfirmText(e.target.value)}
+                          placeholder="DELETE"
+                          className="mt-1"
+                          autoComplete="off"
+                        />
+                      </div>
+                    </div>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={deleteConfirmText !== 'DELETE'}
+                    onClick={() => {
+                      onDeleteIssue(issue.id);
+                      setDeleteConfirmText('');
+                      setDeleteOpen(false);
+                    }}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Permanently Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
       </CardContent>
     </Card>
