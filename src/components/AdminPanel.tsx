@@ -86,6 +86,19 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
     onChange?.();
   };
 
+  const setApproval = async (userId: string, approved: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('set_user_approved', { _user_id: userId, _approved: approved });
+    setBusy(false);
+    if (error) {
+      toast({ title: 'Could not update approval', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: approved ? 'User approved' : 'Approval revoked' });
+    await load();
+    onChange?.();
+  };
+
   return (
     <Card className="bg-gradient-card shadow-card">
       <CardHeader>
