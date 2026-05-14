@@ -8,6 +8,7 @@ import ClosedIssues from "./pages/ClosedIssues";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import { useInactivityRefresh } from "./hooks/useInactivityRefresh";
+import { AuthGate } from "./components/AuthGate";
 
 const queryClient = new QueryClient();
 
