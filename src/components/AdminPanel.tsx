@@ -183,6 +183,39 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
             </div>
           )}
         </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <Trash2 className="h-4 w-4" />
+            Deletion audit log ({auditLog.length})
+          </h3>
+          {auditLog.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No issues have been deleted yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {auditLog.map((row) => (
+                <div key={row.id} className="p-3 bg-muted/30 rounded-lg text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-medium truncate">{row.issue_title}</div>
+                    <div className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(row.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Deleted by {row.deleted_by_email ?? 'unknown'} · {row.examples_count} example
+                    {row.examples_count === 1 ? '' : 's'} · {row.votes_count} vote
+                    {row.votes_count === 1 ? '' : 's'}
+                  </div>
+                  {row.issue_description && (
+                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {row.issue_description}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
