@@ -14,10 +14,21 @@ interface ProfileRow {
   avatar_url?: string | null;
 }
 
+interface AuditRow {
+  id: string;
+  issue_title: string;
+  issue_description: string | null;
+  deleted_by_email: string | null;
+  examples_count: number;
+  votes_count: number;
+  created_at: string;
+}
+
 export function AdminPanel({ currentUserId, onChange }: { currentUserId: string; onChange?: () => void }) {
   const { toast } = useToast();
   const [admins, setAdmins] = useState<ProfileRow[]>([]);
   const [nonAdmins, setNonAdmins] = useState<ProfileRow[]>([]);
+  const [auditLog, setAuditLog] = useState<AuditRow[]>([]);
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
