@@ -33,9 +33,14 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const [{ data: roles }, { data: profiles }] = await Promise.all([
+    const [{ data: roles }, { data: profiles }, { data: audit }] = await Promise.all([
       supabase.from('user_roles').select('user_id').eq('role', 'admin'),
       supabase.from('profiles').select('user_id, display_name, email, avatar_url'),
+      supabase
+        .from('deletion_audit_log')
+        .select('id, issue_title, issue_description, deleted_by_email, examples_count, votes_count, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
     const adminIds = new Set((roles ?? []).map((r: any) => r.user_id));
     const all = (profiles ?? []) as ProfileRow[];
@@ -45,6 +50,7 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
         .filter((p) => !adminIds.has(p.user_id))
         .sort((a, b) => (a.display_name ?? a.email ?? '').localeCompare(b.display_name ?? b.email ?? ''))
     );
+    setAuditLog((audit ?? []) as AuditRow[]);
   };
 
   useEffect(() => {
