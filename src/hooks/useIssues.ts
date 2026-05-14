@@ -248,18 +248,33 @@ export function useIssues() {
   }, []);
 
   const deleteIssue = useCallback(async (issueId: string) => {
+    const target = issues.find((i) => i.id === issueId);
     // Delete dependent rows first (no ON DELETE CASCADE configured)
     await supabase.from('customer_examples').delete().eq('issue_id', issueId);
     await supabase.from('issue_votes').delete().eq('issue_id', issueId);
     const { error } = await supabase.from('issues').delete().eq('id', issueId);
     if (error) throw error;
+
+    // Audit log (best-effort; admin-only readable)
+    if (user && target) {
+      await supabase.from('deletion_audit_log').insert({
+        issue_id: issueId,
+        issue_title: target.title,
+        issue_description: target.description,
+        deleted_by: user.id,
+        deleted_by_email: user.email ?? null,
+        examples_count: target.customerData.length,
+        votes_count: target.votes,
+      });
+    }
+
     setIssues((prev) => prev.filter((i) => i.id !== issueId));
     setVoteTimestamps((prev) => {
       const next = new Map(prev);
       next.delete(issueId);
       return next;
     });
-  }, []);
+  }, [issues, user]);
 
   const hasVoted = useCallback((issueId: string) => voteTimestamps.has(issueId), [voteTimestamps]);
 

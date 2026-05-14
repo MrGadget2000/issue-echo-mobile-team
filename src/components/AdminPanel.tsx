@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Shield, UserPlus, X } from 'lucide-react';
+import { Shield, UserPlus, X, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileRow {
@@ -14,17 +14,33 @@ interface ProfileRow {
   avatar_url?: string | null;
 }
 
+interface AuditRow {
+  id: string;
+  issue_title: string;
+  issue_description: string | null;
+  deleted_by_email: string | null;
+  examples_count: number;
+  votes_count: number;
+  created_at: string;
+}
+
 export function AdminPanel({ currentUserId, onChange }: { currentUserId: string; onChange?: () => void }) {
   const { toast } = useToast();
   const [admins, setAdmins] = useState<ProfileRow[]>([]);
   const [nonAdmins, setNonAdmins] = useState<ProfileRow[]>([]);
+  const [auditLog, setAuditLog] = useState<AuditRow[]>([]);
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const [{ data: roles }, { data: profiles }] = await Promise.all([
+    const [{ data: roles }, { data: profiles }, { data: audit }] = await Promise.all([
       supabase.from('user_roles').select('user_id').eq('role', 'admin'),
       supabase.from('profiles').select('user_id, display_name, email, avatar_url'),
+      supabase
+        .from('deletion_audit_log')
+        .select('id, issue_title, issue_description, deleted_by_email, examples_count, votes_count, created_at')
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
     const adminIds = new Set((roles ?? []).map((r: any) => r.user_id));
     const all = (profiles ?? []) as ProfileRow[];
@@ -34,6 +50,7 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
         .filter((p) => !adminIds.has(p.user_id))
         .sort((a, b) => (a.display_name ?? a.email ?? '').localeCompare(b.display_name ?? b.email ?? ''))
     );
+    setAuditLog((audit ?? []) as AuditRow[]);
   };
 
   useEffect(() => {
@@ -161,6 +178,39 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
                     <UserPlus className="h-4 w-4 mr-1" />
                     Promote
                   </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <Trash2 className="h-4 w-4" />
+            Deletion audit log ({auditLog.length})
+          </h3>
+          {auditLog.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No issues have been deleted yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {auditLog.map((row) => (
+                <div key={row.id} className="p-3 bg-muted/30 rounded-lg text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="font-medium truncate">{row.issue_title}</div>
+                    <div className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(row.created_at).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Deleted by {row.deleted_by_email ?? 'unknown'} · {row.examples_count} example
+                    {row.examples_count === 1 ? '' : 's'} · {row.votes_count} vote
+                    {row.votes_count === 1 ? '' : 's'}
+                  </div>
+                  {row.issue_description && (
+                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                      {row.issue_description}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

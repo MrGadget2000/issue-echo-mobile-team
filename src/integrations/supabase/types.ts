@@ -55,6 +55,42 @@ export type Database = {
           },
         ]
       }
+      deletion_audit_log: {
+        Row: {
+          created_at: string
+          deleted_by: string | null
+          deleted_by_email: string | null
+          examples_count: number
+          id: string
+          issue_description: string | null
+          issue_id: string
+          issue_title: string
+          votes_count: number
+        }
+        Insert: {
+          created_at?: string
+          deleted_by?: string | null
+          deleted_by_email?: string | null
+          examples_count?: number
+          id?: string
+          issue_description?: string | null
+          issue_id: string
+          issue_title: string
+          votes_count?: number
+        }
+        Update: {
+          created_at?: string
+          deleted_by?: string | null
+          deleted_by_email?: string | null
+          examples_count?: number
+          id?: string
+          issue_description?: string | null
+          issue_id?: string
+          issue_title?: string
+          votes_count?: number
+        }
+        Relationships: []
+      }
       issue_votes: {
         Row: {
           created_at: string

@@ -7,10 +7,13 @@ import Index from "./pages/Index";
 import ClosedIssues from "./pages/ClosedIssues";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import { useInactivityRefresh } from "./hooks/useInactivityRefresh";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useInactivityRefresh(300_000);
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -26,6 +29,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
