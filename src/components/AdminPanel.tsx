@@ -177,21 +177,51 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
                       </div>
                     )}
                     <div>
-                      <div className="font-medium text-sm">{u.display_name ?? u.email}</div>
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {u.display_name ?? u.email}
+                        {!u.approved && (
+                          <Badge variant="outline" className="text-[10px] border-accent text-accent">
+                            Pending
+                          </Badge>
+                        )}
+                      </div>
                       {u.email && u.email !== u.display_name && (
                         <div className="text-xs text-muted-foreground">{u.email}</div>
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => u.email && grantByEmail(u.email)}
-                    disabled={busy || !u.email}
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Promote
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {u.approved ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setApproval(u.user_id, false)}
+                        disabled={busy}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Revoke access
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setApproval(u.user_id, true)}
+                        disabled={busy}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => u.email && grantByEmail(u.email)}
+                      disabled={busy || !u.email}
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Promote
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
