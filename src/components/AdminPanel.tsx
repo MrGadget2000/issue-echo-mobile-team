@@ -36,7 +36,7 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
   const load = async () => {
     const [{ data: roles }, { data: profiles }, { data: audit }] = await Promise.all([
       supabase.from('user_roles').select('user_id').eq('role', 'admin'),
-      supabase.from('profiles').select('user_id, display_name, email, avatar_url'),
+      supabase.from('profiles').select('user_id, display_name, email, avatar_url, approved'),
       supabase
         .from('deletion_audit_log')
         .select('id, issue_title, issue_description, deleted_by_email, examples_count, votes_count, created_at')
