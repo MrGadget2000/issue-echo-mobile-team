@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Shield, UserPlus, X, Trash2 } from 'lucide-react';
+import { Shield, UserPlus, X, Trash2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileRow {
@@ -12,6 +12,7 @@ interface ProfileRow {
   display_name?: string | null;
   email?: string | null;
   avatar_url?: string | null;
+  approved?: boolean | null;
 }
 
 interface AuditRow {
@@ -35,7 +36,7 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
   const load = async () => {
     const [{ data: roles }, { data: profiles }, { data: audit }] = await Promise.all([
       supabase.from('user_roles').select('user_id').eq('role', 'admin'),
-      supabase.from('profiles').select('user_id, display_name, email, avatar_url'),
+      supabase.from('profiles').select('user_id, display_name, email, avatar_url, approved'),
       supabase
         .from('deletion_audit_log')
         .select('id, issue_title, issue_description, deleted_by_email, examples_count, votes_count, created_at')
@@ -81,6 +82,19 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
       return;
     }
     toast({ title: 'Admin revoked' });
+    await load();
+    onChange?.();
+  };
+
+  const setApproval = async (userId: string, approved: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('set_user_approved', { _user_id: userId, _approved: approved });
+    setBusy(false);
+    if (error) {
+      toast({ title: 'Could not update approval', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: approved ? 'User approved' : 'Approval revoked' });
     await load();
     onChange?.();
   };
@@ -163,21 +177,51 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
                       </div>
                     )}
                     <div>
-                      <div className="font-medium text-sm">{u.display_name ?? u.email}</div>
+                      <div className="font-medium text-sm flex items-center gap-2">
+                        {u.display_name ?? u.email}
+                        {!u.approved && (
+                          <Badge variant="outline" className="text-[10px] border-accent text-accent">
+                            Pending
+                          </Badge>
+                        )}
+                      </div>
                       {u.email && u.email !== u.display_name && (
                         <div className="text-xs text-muted-foreground">{u.email}</div>
                       )}
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => u.email && grantByEmail(u.email)}
-                    disabled={busy || !u.email}
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Promote
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {u.approved ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setApproval(u.user_id, false)}
+                        disabled={busy}
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Revoke access
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setApproval(u.user_id, true)}
+                        disabled={busy}
+                      >
+                        <Check className="h-4 w-4 mr-1" />
+                        Approve
+                      </Button>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => u.email && grantByEmail(u.email)}
+                      disabled={busy || !u.email}
+                    >
+                      <UserPlus className="h-4 w-4 mr-1" />
+                      Promote
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>

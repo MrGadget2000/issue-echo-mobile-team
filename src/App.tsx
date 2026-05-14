@@ -8,6 +8,7 @@ import ClosedIssues from "./pages/ClosedIssues";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 import { useInactivityRefresh } from "./hooks/useInactivityRefresh";
+import { AuthGate } from "./components/AuthGate";
 
 const queryClient = new QueryClient();
 
@@ -19,13 +20,15 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/closed" element={<ClosedIssues />} />
-          <Route path="/reports" element={<Reports />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthGate>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/closed" element={<ClosedIssues />} />
+            <Route path="/reports" element={<Reports />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthGate>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
