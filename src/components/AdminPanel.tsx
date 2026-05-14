@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Shield, UserPlus, X, Trash2 } from 'lucide-react';
+import { Shield, UserPlus, X, Trash2, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfileRow {
@@ -12,6 +12,7 @@ interface ProfileRow {
   display_name?: string | null;
   email?: string | null;
   avatar_url?: string | null;
+  approved?: boolean | null;
 }
 
 interface AuditRow {
