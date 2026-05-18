@@ -40,7 +40,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
 
   return (
     <Card className={`w-full bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}>
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start justify-between">
           <CardTitle className={`text-lg font-semibold pr-4 ${issue.closed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
             {sanitizeHtml(issue.title)}
@@ -69,7 +69,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-4 pb-4">
         <p className="text-muted-foreground leading-relaxed">{sanitizeHtml(issue.description)}</p>
 
         {issue.createdByProfile && (
