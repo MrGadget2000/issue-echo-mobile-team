@@ -270,7 +270,7 @@ const Index = () => {
         )}
 
         {!loading && recentIssues.length > 0 && (
-          <div className="space-y-6 mb-12">
+          <div className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                 <AlertTriangle className="h-6 w-6 text-accent" />
@@ -281,7 +281,7 @@ const Index = () => {
               </Badge>
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {recentIssues.map((issue) => (
                 <div key={`recent-${issue.id}`} className="relative">
                   <Badge variant="secondary" className="absolute -top-2 -left-2 z-10 text-xs bg-accent text-accent-foreground">
@@ -295,7 +295,7 @@ const Index = () => {
         )}
 
         {!loading && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
                 <TrendingUp className="h-6 w-6 text-primary" />
@@ -319,7 +319,7 @@ const Index = () => {
                 )}
               </div>
             ) : (
-              <div className="grid gap-6">
+              <div className="grid gap-4">
                 {top10Issues.map((issue, index) => (
                   <div key={issue.id} className="relative">
                     <Badge

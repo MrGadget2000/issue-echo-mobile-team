@@ -99,7 +99,7 @@ const ClosedIssues = () => {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Archive className="h-6 w-6 text-muted-foreground" />
@@ -123,7 +123,7 @@ const ClosedIssues = () => {
               </div>
             </div>
           ) : (
-            <div className="grid gap-6">
+            <div className="grid gap-4">
               {filteredClosedIssues.map((issue) => (
                 <IssueCard
                   key={issue.id}
