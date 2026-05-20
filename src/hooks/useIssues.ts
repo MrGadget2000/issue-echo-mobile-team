@@ -45,7 +45,7 @@ type DbProfileRow = {
   email: string | null;
 };
 
-const COOLDOWN_MS = 5 * 60 * 1000;
+const COOLDOWN_MS = 30 * 1000;
 
 export function useIssues() {
   const { user } = useAuth();
