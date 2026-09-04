@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ISSUE_AREAS } from '@/lib/issueAreas';
 
 // Customer data validation schema
 export const customerDataSchema = z.object({
@@ -19,6 +20,7 @@ export const issueSchema = z.object({
     .min(1, 'Description is required')
     .max(1000, 'Description must be less than 1000 characters')
     .regex(/^[a-zA-Z0-9\s\-_.!?(),\n\r]+$/, 'Description contains invalid characters'),
+  issueArea: z.enum(ISSUE_AREAS).optional(),
   workaroundAvailable: z.string().max(500, 'Workaround description must be less than 500 characters').optional(),
   customerImpact: z.enum(['none', 'low', 'medium', 'high']).optional(),
   teamImpact: z.enum(['none', 'low', 'medium', 'high']).optional(),
