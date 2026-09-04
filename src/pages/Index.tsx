@@ -6,7 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut, Download } from 'lucide-react';
+import { exportIssuesToCsv } from '@/lib/exportCsv';
 import { CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
@@ -195,6 +196,15 @@ const Index = () => {
               <Input placeholder="Search issues..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
           </div>
+
+          <Button variant="outline" onClick={() => {
+            exportIssuesToCsv(issues);
+            toast({ title: 'Export started', description: `${issues.length} issues exported to CSV.` });
+          }}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+
 
           <Dialog open={showNewIssueForm} onOpenChange={(open) => {
             if (open && !user) {
