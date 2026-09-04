@@ -251,6 +251,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cast_vote: { Args: { _issue_id: string }; Returns: Json }
       claim_first_admin: { Args: never; Returns: boolean }
       grant_admin_by_email: { Args: { _email: string }; Returns: boolean }
       revoke_admin: { Args: { _user_id: string }; Returns: boolean }

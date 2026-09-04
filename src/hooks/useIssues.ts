@@ -152,7 +152,6 @@ export function useIssues() {
       .insert({
         title,
         description,
-        votes: 1,
         created_by: user.id,
         workaround_available: impactData?.workaroundAvailable,
         customer_impact: impactData?.customerImpact,
@@ -164,11 +163,8 @@ export function useIssues() {
       .single();
     if (error || !created) throw error ?? new Error('Failed to create issue');
 
-    await supabase.from('issue_votes').insert({
-      issue_id: created.id,
-      voter_id: user.id,
-      user_id: user.id,
-    });
+    // Creator's initial vote is recorded server-side so the count cannot be forged.
+    await (supabase.rpc as CallableFunction)('cast_vote', { _issue_id: created.id });
 
     if (customerData) {
       await supabase.from('customer_examples').insert({
@@ -193,16 +189,21 @@ export function useIssues() {
     const issue = issues.find((i) => i.id === issueId);
     if (!issue) return { ok: false };
 
-    await supabase.from('issue_votes').insert({
-      issue_id: issueId,
-      voter_id: user.id,
-      user_id: user.id,
-    });
-    await supabase.from('issues').update({ votes: issue.votes + 1 }).eq('id', issueId);
+    // Vote counting and cooldown are enforced server-side; the client never writes the count.
+    const { data, error } = await (supabase.rpc as CallableFunction)('cast_vote', { _issue_id: issueId })
+      .then((r: { data: unknown; error: unknown }) => r);
+    if (error) return { ok: false, error: 'vote-failed' };
+    const result = data as { ok: boolean; retry_after_seconds?: number; votes?: number } | null;
+    if (!result?.ok) {
+      const retryMs = (result?.retry_after_seconds ?? 30) * 1000;
+      return { ok: false, remainingMinutes: Math.ceil(retryMs / 60000) };
+    }
 
     setVoteTimestamps((prev) => new Map(prev).set(issueId, now));
     setIssues((prev) =>
-      prev.map((i) => (i.id === issueId ? { ...i, votes: i.votes + 1, votedBy: [...i.votedBy, user.id] } : i))
+      prev.map((i) =>
+        i.id === issueId ? { ...i, votes: result.votes ?? i.votes + 1, votedBy: [...i.votedBy, user.id] } : i
+      )
     );
     return { ok: true };
   }, [issues, voteTimestamps, user]);
