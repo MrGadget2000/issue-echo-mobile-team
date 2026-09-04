@@ -163,11 +163,8 @@ export function useIssues() {
       .single();
     if (error || !created) throw error ?? new Error('Failed to create issue');
 
-    await supabase.from('issue_votes').insert({
-      issue_id: created.id,
-      voter_id: user.id,
-      user_id: user.id,
-    });
+    // Creator's initial vote is recorded server-side so the count cannot be forged.
+    await (supabase.rpc as CallableFunction)('cast_vote', { _issue_id: created.id });
 
     if (customerData) {
       await supabase.from('customer_examples').insert({
