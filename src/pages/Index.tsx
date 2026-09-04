@@ -197,6 +197,15 @@ const Index = () => {
             </div>
           </div>
 
+          <Button variant="outline" onClick={() => {
+            exportIssuesToCsv(issues);
+            toast({ title: 'Export started', description: `${issues.length} issues exported to CSV.` });
+          }}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+
+
           <Dialog open={showNewIssueForm} onOpenChange={(open) => {
             if (open && !user) {
               toast({ title: 'Sign in required', description: 'Please sign in with Google to report an issue.', variant: 'destructive' });
