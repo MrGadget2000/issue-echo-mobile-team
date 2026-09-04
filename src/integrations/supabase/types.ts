@@ -177,13 +177,30 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_emails: {
+        Row: {
+          created_at: string
+          email: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approved: boolean
           avatar_url: string | null
           created_at: string
           display_name: string | null
-          email: string | null
           id: string
           updated_at: string
           user_id: string
@@ -193,7 +210,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           id?: string
           updated_at?: string
           user_id: string
@@ -203,7 +219,6 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string | null
-          email?: string | null
           id?: string
           updated_at?: string
           user_id?: string
@@ -233,24 +248,7 @@ export type Database = {
       }
     }
     Views: {
-      profiles_directory: {
-        Row: {
-          avatar_url: string | null
-          display_name: string | null
-          user_id: string | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          display_name?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          avatar_url?: string | null
-          display_name?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       claim_first_admin: { Args: never; Returns: boolean }
