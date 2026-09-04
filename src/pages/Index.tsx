@@ -137,8 +137,8 @@ const Index = () => {
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Mobile Service Issue Tracker</h1>
-              <p className="text-primary-foreground/80 mt-1">Track and prioritise provisioning issues with team collaboration</p>
+              <h1 className="text-3xl font-bold">Issue Tracker</h1>
+              <p className="text-primary-foreground/80 mt-1">Track and prioritise issues with team collaboration</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
