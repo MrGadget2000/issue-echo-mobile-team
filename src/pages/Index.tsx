@@ -13,9 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ISSUE_AREAS } from '@/lib/issueAreas';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [areaFilter, setAreaFilter] = useState('');
   const [showNewIssueForm, setShowNewIssueForm] = useState(false);
   const { toast } = useToast();
   const { user, signInWithGoogle, signOut } = useAuth();
@@ -50,12 +53,13 @@ const Index = () => {
   const filteredIssues = useMemo(() => {
     return issues
       .filter((issue) => !issue.closed)
+      .filter((issue) => !areaFilter || issue.issueArea === areaFilter)
       .filter(
         (issue) =>
           issue.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           issue.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
-  }, [issues, searchTerm]);
+  }, [issues, searchTerm, areaFilter]);
 
   const top10Issues = useMemo(() => {
     return [...filteredIssues]
@@ -196,6 +200,19 @@ const Index = () => {
               <Input placeholder="Search issues..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
           </div>
+
+          <Select value={areaFilter || '__all__'} onValueChange={(v) => setAreaFilter(v === '__all__' ? '' : v)}>
+            <SelectTrigger className="w-full sm:w-56">
+              <SelectValue placeholder="All issue areas" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">All issue areas</SelectItem>
+              {ISSUE_AREAS.map((area) => (
+                <SelectItem key={area} value={area}>{area}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
 
           <Button variant="outline" onClick={() => {
             exportIssuesToCsv(issues);

@@ -10,11 +10,13 @@ import { CustomerDataForm } from './CustomerDataForm';
 import { Plus, X } from 'lucide-react';
 import { CustomerData } from '@/types/issue';
 import { issueSchema } from '@/lib/validation';
+import { ISSUE_AREAS } from '@/lib/issueAreas';
 import { sanitizeText } from '@/lib/security';
 import { useToast } from '@/hooks/use-toast';
 
 interface NewIssueFormProps {
   onSubmit: (title: string, description: string, customerData?: CustomerData, impactData?: {
+    issueArea?: string;
     workaroundAvailable?: string;
     customerImpact?: 'none' | 'low' | 'medium' | 'high';
     teamImpact?: 'none' | 'low' | 'medium' | 'high';
@@ -27,6 +29,7 @@ interface NewIssueFormProps {
 export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [issueArea, setIssueArea] = useState<string>('');
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [customerData, setCustomerData] = useState<CustomerData | undefined>();
   const [workaroundAvailable, setWorkaroundAvailable] = useState('');
@@ -47,6 +50,7 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
     const result = issueSchema.safeParse({
       title: sanitizedTitle,
       description: sanitizedDescription,
+      issueArea: issueArea || undefined,
       workaroundAvailable: sanitizeText(workaroundAvailable.trim()),
       customerImpact: customerImpact || undefined,
       teamImpact: teamImpact || undefined,
@@ -73,6 +77,7 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
     if (sanitizedTitle && sanitizedDescription) {
       setErrors({});
       const impactData = {
+        issueArea: issueArea || undefined,
         workaroundAvailable: workaroundAvailable.trim() || undefined,
         customerImpact: (customerImpact as 'none' | 'low' | 'medium' | 'high') || undefined,
         teamImpact: (teamImpact as 'none' | 'low' | 'medium' | 'high') || undefined,
@@ -133,6 +138,23 @@ export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
             />
             {errors.description && (
               <p className="text-sm text-destructive">{errors.description}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="issueArea">Issue Area</Label>
+            <Select value={issueArea} onValueChange={setIssueArea}>
+              <SelectTrigger id="issueArea" className={errors.issueArea ? 'border-destructive' : ''}>
+                <SelectValue placeholder="Select the area this issue relates to" />
+              </SelectTrigger>
+              <SelectContent>
+                {ISSUE_AREAS.map((area) => (
+                  <SelectItem key={area} value={area}>{area}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.issueArea && (
+              <p className="text-sm text-destructive">{errors.issueArea}</p>
             )}
           </div>
           

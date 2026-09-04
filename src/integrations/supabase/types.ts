@@ -135,6 +135,7 @@ export type Database = {
           description: string
           effort_estimate: string | null
           id: string
+          issue_area: string | null
           team_impact: string | null
           title: string
           updated_at: string
@@ -152,6 +153,7 @@ export type Database = {
           description: string
           effort_estimate?: string | null
           id?: string
+          issue_area?: string | null
           team_impact?: string | null
           title: string
           updated_at?: string
@@ -169,6 +171,7 @@ export type Database = {
           description?: string
           effort_estimate?: string | null
           id?: string
+          issue_area?: string | null
           team_impact?: string | null
           title?: string
           updated_at?: string

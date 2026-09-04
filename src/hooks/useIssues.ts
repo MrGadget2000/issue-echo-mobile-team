@@ -12,6 +12,7 @@ type DbIssueRow = {
   closed_at: string | null;
   closed_by: string | null;
   created_by: string | null;
+  issue_area: string | null;
   workaround_available: string | null;
   customer_impact: string | null;
   team_impact: string | null;
@@ -115,6 +116,7 @@ export function useIssues() {
       closedBy: row.closed_by ?? undefined,
       votedBy: votersByIssue.get(row.id) ?? [],
       customerData: examplesByIssue.get(row.id) ?? [],
+      issueArea: row.issue_area ?? undefined,
       workaroundAvailable: row.workaround_available ?? undefined,
       customerImpact: (row.customer_impact as Issue['customerImpact']) ?? undefined,
       teamImpact: (row.team_impact as Issue['teamImpact']) ?? undefined,
@@ -139,6 +141,7 @@ export function useIssues() {
     description: string,
     customerData?: CustomerData,
     impactData?: {
+      issueArea?: string;
       workaroundAvailable?: string;
       customerImpact?: 'none' | 'low' | 'medium' | 'high';
       teamImpact?: 'none' | 'low' | 'medium' | 'high';
@@ -153,6 +156,7 @@ export function useIssues() {
         title,
         description,
         created_by: user.id,
+        issue_area: impactData?.issueArea,
         workaround_available: impactData?.workaroundAvailable,
         customer_impact: impactData?.customerImpact,
         team_impact: impactData?.teamImpact,

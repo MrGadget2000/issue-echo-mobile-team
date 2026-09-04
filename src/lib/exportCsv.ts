@@ -10,6 +10,7 @@ export function exportIssuesToCsv(issues: Issue[]): void {
   const headers = [
     'Title',
     'Description',
+    'Issue Area',
     'Status',
     'Votes',
     'Customer Examples',
@@ -44,6 +45,7 @@ export function exportIssuesToCsv(issues: Issue[]): void {
     return [
       issue.title,
       issue.description,
+      issue.issueArea ?? '',
       issue.closed ? 'Closed' : 'Open',
       issue.votes,
       issue.customerData.length,

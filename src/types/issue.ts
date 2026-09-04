@@ -18,6 +18,7 @@ export interface Issue {
   closed: boolean;
   closedAt?: Date;
   closedBy?: string;
+  issueArea?: string;
   workaroundAvailable?: string;
   customerImpact?: 'none' | 'low' | 'medium' | 'high';
   teamImpact?: 'none' | 'low' | 'medium' | 'high';
