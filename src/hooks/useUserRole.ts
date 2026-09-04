@@ -10,12 +10,20 @@ export function useUserRole() {
 
   const refresh = async () => {
     setLoading(true);
+    if (!user) {
+      setIsAdmin(false);
+      setAnyAdminExists(null);
+      setLoading(false);
+      return;
+    }
     const { data: roles } = await supabase
       .from('user_roles')
-      .select('user_id, role');
-    const admins = (roles ?? []).filter((r: any) => r.role === 'admin');
-    setAnyAdminExists(admins.length > 0);
-    setIsAdmin(!!user && admins.some((r: any) => r.user_id === user.id));
+      .select('role')
+      .eq('user_id', user.id);
+    setIsAdmin((roles ?? []).some((r: any) => r.role === 'admin'));
+    // Role assignments of other users are not readable; the server decides
+    // whether the first-admin claim is still available.
+    setAnyAdminExists(null);
     setLoading(false);
   };
 

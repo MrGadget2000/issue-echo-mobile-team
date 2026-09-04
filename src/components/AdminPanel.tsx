@@ -34,9 +34,10 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const [{ data: roles }, { data: profiles }, { data: audit }] = await Promise.all([
+    const [{ data: roles }, { data: profiles }, { data: emails }, { data: audit }] = await Promise.all([
       supabase.from('user_roles').select('user_id').eq('role', 'admin'),
-      supabase.from('profiles').select('user_id, display_name, email, avatar_url, approved'),
+      supabase.from('profiles').select('user_id, display_name, avatar_url, approved'),
+      supabase.from('profile_emails').select('user_id, email'),
       supabase
         .from('deletion_audit_log')
         .select('id, issue_title, issue_description, deleted_by_email, examples_count, votes_count, created_at')
@@ -44,7 +45,8 @@ export function AdminPanel({ currentUserId, onChange }: { currentUserId: string;
         .limit(100),
     ]);
     const adminIds = new Set((roles ?? []).map((r: any) => r.user_id));
-    const all = (profiles ?? []) as ProfileRow[];
+    const emailMap = new Map<string, string | null>((emails ?? []).map((e: any) => [e.user_id, e.email]));
+    const all = ((profiles ?? []) as ProfileRow[]).map((p) => ({ ...p, email: emailMap.get(p.user_id) ?? null }));
     setAdmins(all.filter((p) => adminIds.has(p.user_id)));
     setNonAdmins(
       all

@@ -42,7 +42,6 @@ type DbProfileRow = {
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
-  email: string | null;
 };
 
 const COOLDOWN_MS = 30 * 1000;
@@ -60,7 +59,7 @@ export function useIssues() {
       supabase.from('issues').select('*').order('created_at', { ascending: false }),
       supabase.from('customer_examples').select('*'),
       supabase.from('issue_votes').select('issue_id, voter_id, user_id, created_at'),
-      supabase.from('profiles').select('user_id, display_name, avatar_url, email'),
+      supabase.from('profiles').select('user_id, display_name, avatar_url'),
     ]);
 
     const issueRows = (issuesRes.data ?? []) as DbIssueRow[];
@@ -74,7 +73,6 @@ export function useIssues() {
         userId: p.user_id,
         displayName: p.display_name ?? undefined,
         avatarUrl: p.avatar_url ?? undefined,
-        email: p.email ?? undefined,
       });
     });
 
