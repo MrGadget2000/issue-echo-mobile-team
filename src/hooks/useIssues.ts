@@ -152,7 +152,6 @@ export function useIssues() {
       .insert({
         title,
         description,
-        votes: 1,
         created_by: user.id,
         workaround_available: impactData?.workaroundAvailable,
         customer_impact: impactData?.customerImpact,
