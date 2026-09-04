@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface NewIssueFormProps {
   onSubmit: (title: string, description: string, customerData?: CustomerData, impactData?: {
+    issueArea?: string;
     workaroundAvailable?: string;
     customerImpact?: 'none' | 'low' | 'medium' | 'high';
     teamImpact?: 'none' | 'low' | 'medium' | 'high';
@@ -27,6 +28,7 @@ interface NewIssueFormProps {
 export function NewIssueForm({ onSubmit, onCancel }: NewIssueFormProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [issueArea, setIssueArea] = useState<string>('');
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [customerData, setCustomerData] = useState<CustomerData | undefined>();
   const [workaroundAvailable, setWorkaroundAvailable] = useState('');
