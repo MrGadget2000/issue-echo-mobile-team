@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 const Reports = () => {
   const { issues: mockIssues, loading } = useIssues();
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
-  const { isAdmin, anyAdminExists, loading: roleLoading, refresh: refreshRole } = useUserRole();
+  const { isAdmin, loading: roleLoading, refresh: refreshRole } = useUserRole();
   const { toast } = useToast();
 
   const claimFirstAdmin = async () => {
@@ -170,15 +170,16 @@ const Reports = () => {
             </p>
             {!user ? (
               <Button onClick={signInWithGoogle} className="w-full">Sign in with Google</Button>
-            ) : anyAdminExists === false ? (
+            ) : (
               <>
-                <p className="text-sm">No admin has been set up yet. Claim the first admin role to bootstrap your team.</p>
-                <Button onClick={claimFirstAdmin} className="w-full">
+                <p className="text-sm">
+                  Ask an existing admin to grant you access. If no admin has been set up yet, you can claim
+                  the first admin role below.
+                </p>
+                <Button onClick={claimFirstAdmin} variant="outline" className="w-full">
                   <Shield className="h-4 w-4 mr-2" /> Claim first admin
                 </Button>
               </>
-            ) : (
-              <p className="text-sm">Ask an existing admin to grant you access.</p>
             )}
             <Link to="/" className="block text-sm text-primary hover:underline text-center">← Back to issues</Link>
           </CardContent>
