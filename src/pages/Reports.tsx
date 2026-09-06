@@ -451,6 +451,34 @@ const Reports = () => {
           </Card>
         </div>
 
+        {/* Issues by Area */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Issues by Area
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {areaBreakdown.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No issues yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {areaBreakdown.map((row) => (
+                  <div key={row.area} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                    <span className="font-medium text-sm">{row.area}</span>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">{row.total} total</Badge>
+                      <Badge variant="outline">{row.open} open</Badge>
+                      <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">{row.examples} examples</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Top Reporters */}
         <Card className="mt-6 bg-gradient-card shadow-card">
           <CardHeader>
