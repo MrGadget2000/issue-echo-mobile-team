@@ -120,6 +120,22 @@ const Reports = () => {
     [mockIssues]
   );
 
+  const areaBreakdown = useMemo(() => {
+    const counts = new Map<string, { total: number; open: number; examples: number }>();
+    mockIssues.forEach((issue) => {
+      const key = issue.issueArea ?? 'Unspecified';
+      const entry = counts.get(key) ?? { total: 0, open: 0, examples: 0 };
+      entry.total += 1;
+      if (!issue.closed) entry.open += 1;
+      entry.examples += issue.customerData.length;
+      counts.set(key, entry);
+    });
+    return Array.from(counts.entries())
+      .map(([area, v]) => ({ area, ...v }))
+      .sort((a, b) => b.total - a.total);
+  }, [mockIssues]);
+
+
   const dailyActivity = useMemo(() => {
     const days: { date: string; label: string; count: number }[] = [];
     const today = new Date();
