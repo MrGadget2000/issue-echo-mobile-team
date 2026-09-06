@@ -370,6 +370,25 @@ const Index = () => {
             )}
           </div>
         )}
+
+        {!loading && filteredIssues.length > 0 && (
+          <div className="space-y-4 mt-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+                <Archive className="h-6 w-6 text-primary" />
+                All Open Issues {searchTerm && `(filtered)`}
+              </h2>
+              <Badge variant="secondary" className="text-sm">
+                {filteredIssues.length} open
+              </Badge>
+            </div>
+            <div className="grid gap-4">
+              {filteredIssues.map((issue) => (
+                <IssueCard key={issue.id} issue={issue} onVote={handleVote} onAddCustomerData={handleAddCustomerData} onCloseIssue={handleCloseIssue} onDeleteIssue={handleDeleteIssue} isAdmin={isAdmin} hasVoted={hasVoted(issue.id)} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
