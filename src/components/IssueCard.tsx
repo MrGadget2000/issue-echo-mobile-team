@@ -59,12 +59,6 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
               <Clock className="h-3 w-3" />
               {formatDistanceToNow(issue.createdAt, { addSuffix: true })}
             </Badge>
-            {issue.issueArea && (
-              <Badge variant="secondary" className="text-xs bg-accent/10 text-accent border-accent/20 flex items-center gap-1 whitespace-nowrap">
-                <span className="opacity-70 font-normal">Area:</span>
-                {issue.issueArea}
-              </Badge>
-            )}
             {issue.closed && issue.closedAt && (
               <Badge variant="outline" className="flex items-center gap-1 text-muted-foreground">
                 <X className="h-3 w-3" />
