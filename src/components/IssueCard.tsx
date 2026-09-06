@@ -67,6 +67,14 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
             )}
           </div>
         </div>
+        <div className="mt-2">
+          <Badge
+            variant="outline"
+            className="text-xs border-accent/40 bg-accent/10 text-accent font-medium"
+          >
+            Area: {issue.issueArea ?? 'Unspecified'}
+          </Badge>
+        </div>
       </CardHeader>
       
       <CardContent className="space-y-3 px-4 pb-4">
