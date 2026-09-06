@@ -5,7 +5,7 @@ import { ISSUE_AREAS } from '@/lib/issueAreas';
 export const customerDataSchema = z.object({
   customerName: z.string().max(100, 'Customer name must be less than 100 characters').optional(),
   orderId: z.string().regex(/^\d{5,10}$|^$/, 'Order ID must be numeric only (5-10 digits) or empty').optional(),
-  phoneNumber: z.string().regex(/^(\+64[-.\s]?)?(\(0\d\)|0\d)[-.\s]?\d{3}[-.\s]?\d{4}$|^$/, 'Invalid New Zealand phone number format').optional(),
+  phoneNumber: z.string().regex(/^$|^[+\d][\d\s().-]{5,24}$/, 'Please enter a valid phone number').optional(),
   serviceType: z.string().max(50, 'Service type must be less than 50 characters').optional(),
   additionalDetails: z.string().max(1000, 'Additional details must be less than 1000 characters').optional()
 });
