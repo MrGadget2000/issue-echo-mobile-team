@@ -126,7 +126,11 @@ const Index = () => {
       setShowNewIssueForm(false);
       toast({ title: 'Issue created successfully!', description: 'Your issue has been added to the tracking system.' });
     } catch (e) {
-      toast({ title: 'Failed to create issue', description: 'Please try again.', variant: 'destructive' });
+      toast({
+        title: 'Failed to create issue',
+        description: e instanceof Error ? e.message : 'Please try again.',
+        variant: 'destructive',
+      });
     }
   };
 
