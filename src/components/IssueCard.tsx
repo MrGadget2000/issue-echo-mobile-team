@@ -42,7 +42,18 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
   };
 
   return (
-    <Card className={`w-full bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}>
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => setDetailOpen(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setDetailOpen(true);
+        }
+      }}
+      className={`w-full cursor-pointer bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}
+    >
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start justify-between">
           <CardTitle className={`text-lg font-semibold pr-4 ${issue.closed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
