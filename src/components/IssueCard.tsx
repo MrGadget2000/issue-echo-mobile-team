@@ -312,12 +312,19 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
         </div>
       </CardContent>
 
-      <IssueDetailDialog
-        issue={issue}
-        profiles={profiles ?? new Map()}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      {/* React events bubble through portals, so stop them here to avoid
+          the card's onClick reopening the dialog when closing it. */}
+      <div
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <IssueDetailDialog
+          issue={issue}
+          profiles={profiles ?? new Map()}
+          open={detailOpen}
+          onOpenChange={setDetailOpen}
+        />
+      </div>
     </Card>
   );
 }
