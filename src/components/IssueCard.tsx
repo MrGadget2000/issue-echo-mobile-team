@@ -311,6 +311,13 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
           )}
         </div>
       </CardContent>
+
+      <IssueDetailDialog
+        issue={issue}
+        profiles={profiles ?? new Map()}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
     </Card>
   );
 }
