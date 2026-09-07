@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
-import { Issue } from '@/types/issue';
+import { Issue, UserProfile } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
+import { IssueDetailDialog } from './IssueDetailDialog';
 import { formatDistanceToNow } from 'date-fns';
 import { sanitizeHtml } from '@/lib/security';
 
 interface IssueCardProps {
   issue: Issue;
+  profiles?: Map<string, UserProfile>;
   onVote: (issueId: string) => void;
   onAddCustomerData: (issueId: string, customerData: any) => void;
   onCloseIssue?: (issueId: string) => void;
