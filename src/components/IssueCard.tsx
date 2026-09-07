@@ -26,10 +26,11 @@ interface IssueCardProps {
   isAdmin?: boolean;
 }
 
-export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, onDeleteIssue, hasVoted, showCloseButton = true, isAdmin = false }: IssueCardProps) {
+export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, onDeleteIssue, hasVoted, showCloseButton = true, isAdmin = false }: IssueCardProps) {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const handleVote = () => {
     onVote(issue.id);
