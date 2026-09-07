@@ -157,7 +157,7 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
           </div>
         )}
         
-        <div className="flex items-center gap-2 pt-2">
+        <div className="flex items-center gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
           <Button
             variant={hasVoted ? "secondary" : "default"}
             size="sm"
