@@ -11,7 +11,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 const ClosedIssues = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  const { issues, loading, reopenIssue, deleteIssue } = useIssues();
+  const { issues, loading, profiles, reopenIssue, deleteIssue } = useIssues();
 
   const handleDeleteIssue = async (issueId: string) => {
     try {
@@ -128,6 +128,7 @@ const ClosedIssues = () => {
                 <IssueCard
                   key={issue.id}
                   issue={issue}
+                  profiles={profiles}
                   onVote={handleVote}
                   onAddCustomerData={handleAddCustomerData}
                   onReopenIssue={handleReopenIssue}

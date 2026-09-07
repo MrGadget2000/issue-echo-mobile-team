@@ -7,13 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ThumbsUp, Users, Clock, Phone, Package, X, RotateCcw, Trash2, AlertTriangle } from 'lucide-react';
-import { Issue } from '@/types/issue';
+import { Issue, UserProfile } from '@/types/issue';
 import { CustomerDataForm } from './CustomerDataForm';
+import { IssueDetailDialog } from './IssueDetailDialog';
 import { formatDistanceToNow } from 'date-fns';
 import { sanitizeHtml } from '@/lib/security';
 
 interface IssueCardProps {
   issue: Issue;
+  profiles?: Map<string, UserProfile>;
   onVote: (issueId: string) => void;
   onAddCustomerData: (issueId: string, customerData: any) => void;
   onCloseIssue?: (issueId: string) => void;
@@ -24,10 +26,11 @@ interface IssueCardProps {
   isAdmin?: boolean;
 }
 
-export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, onDeleteIssue, hasVoted, showCloseButton = true, isAdmin = false }: IssueCardProps) {
+export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseIssue, onReopenIssue, onDeleteIssue, hasVoted, showCloseButton = true, isAdmin = false }: IssueCardProps) {
   const [showCustomerForm, setShowCustomerForm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   const handleVote = () => {
     onVote(issue.id);
@@ -39,7 +42,18 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
   };
 
   return (
-    <Card className={`w-full bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}>
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => setDetailOpen(true)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setDetailOpen(true);
+        }
+      }}
+      className={`w-full cursor-pointer bg-gradient-card border-border shadow-card hover:shadow-hover transition-smooth ${issue.closed ? 'opacity-75' : ''}`}
+    >
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start justify-between">
           <CardTitle className={`text-lg font-semibold pr-4 ${issue.closed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
@@ -143,7 +157,7 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
           </div>
         )}
         
-        <div className="flex items-center gap-2 pt-2">
+        <div className="flex items-center gap-2 pt-2" onClick={(e) => e.stopPropagation()}>
           <Button
             variant={hasVoted ? "secondary" : "default"}
             size="sm"
@@ -297,6 +311,13 @@ export function IssueCard({ issue, onVote, onAddCustomerData, onCloseIssue, onRe
           )}
         </div>
       </CardContent>
+
+      <IssueDetailDialog
+        issue={issue}
+        profiles={profiles ?? new Map()}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+      />
     </Card>
   );
 }

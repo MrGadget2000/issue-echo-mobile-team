@@ -165,13 +165,15 @@ export function useIssues() {
       })
       .select()
       .single();
-    if (error || !created) throw error ?? new Error('Failed to create issue');
+    if (error || !created) {
+      throw new Error(error?.message ?? 'The issue could not be saved.');
+    }
 
     // Creator's initial vote is recorded server-side so the count cannot be forged.
     await (supabase.rpc as CallableFunction)('cast_vote', { _issue_id: created.id });
 
     if (customerData) {
-      await supabase.from('customer_examples').insert({
+      const { error: exampleError } = await supabase.from('customer_examples').insert({
         issue_id: created.id,
         customer_name: customerData.customerName,
         order_id: customerData.orderId,
@@ -179,6 +181,10 @@ export function useIssues() {
         service_type: customerData.serviceType,
         additional_details: customerData.additionalDetails,
       });
+      if (exampleError) {
+        await loadAll();
+        throw new Error(`Issue saved, but the customer example failed: ${exampleError.message}`);
+      }
     }
     await loadAll();
   }, [user, loadAll]);
