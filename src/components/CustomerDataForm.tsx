@@ -28,8 +28,16 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const trimmedData: CustomerData = {
+      customerName: formData.customerName.trim(),
+      orderId: formData.orderId.trim(),
+      phoneNumber: formData.phoneNumber.trim(),
+      serviceType: formData.serviceType,
+      additionalDetails: formData.additionalDetails.trim()
+    };
+    
     // Validate form data
-    const result = customerDataSchema.safeParse(formData);
+    const result = customerDataSchema.safeParse(trimmedData);
     
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};

@@ -17,13 +17,14 @@ export function sanitizeText(input: string): string {
   const sanitized = sanitizeHtml(input);
   
   // Additional sanitization for common injection patterns
+  // Note: no .trim() here — this runs on every keystroke, and trimming
+  // would eat trailing spaces while the user is still typing.
   return sanitized
     .replace(/javascript:/gi, '')
     .replace(/vbscript:/gi, '')
     .replace(/onload/gi, '')
     .replace(/onerror/gi, '')
-    .replace(/<script[^>]*>.*?<\/script>/gi, '')
-    .trim();
+    .replace(/<script[^>]*>.*?<\/script>/gi, '');
 }
 
 // Validate and sanitize phone number
