@@ -56,10 +56,10 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
     }
     
     // Only submit if at least one field is filled
-    const hasData = Object.values(formData).some(value => value && value.trim() !== '');
+    const hasData = Object.values(trimmedData).some(value => value && value.trim() !== '');
     if (hasData) {
       setErrors({});
-      onSubmit(formData);
+      onSubmit(trimmedData);
     }
   };
 
