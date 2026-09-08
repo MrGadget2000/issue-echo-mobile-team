@@ -45,8 +45,13 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
     <Card
       role="button"
       tabIndex={0}
-      onClick={() => setDetailOpen(true)}
+      onClick={(e) => {
+        const t = e.target as HTMLElement;
+        if (t.closest('input, textarea, select, [contenteditable="true"]')) return;
+        setDetailOpen(true);
+      }}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           setDetailOpen(true);
