@@ -3,8 +3,8 @@ import { Link, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, TrendingUp, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -135,6 +135,156 @@ const Reports = () => {
       .sort((a, b) => b.total - a.total);
   }, [mockIssues]);
 
+
+  // Rolling last-6-months buckets (oldest first), shared by the trend views
+  const monthBuckets = useMemo(() => {
+    const now = new Date();
+    const buckets: { key: string; label: string; month: number; year: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      buckets.push({
+        key: `${d.getFullYear()}-${d.getMonth()}`,
+        label: d.toLocaleDateString('en-NZ', { month: 'short', year: '2-digit' }),
+        month: d.getMonth(),
+        year: d.getFullYear(),
+      });
+    }
+    return buckets;
+  }, []);
+
+  const AREA_CHART_COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    'hsl(var(--chart-6))',
+  ];
+  const OTHER_AREAS_LABEL = 'Other areas';
+
+  const areaTrends = useMemo(() => {
+    const monthKeyOf = (date: Date) => `${date.getFullYear()}-${date.getMonth()}`;
+    const validKeys = new Set(monthBuckets.map((b) => b.key));
+
+    // Count issues raised per area per month within the window
+    const perArea = new Map<string, Map<string, number>>();
+    mockIssues.forEach((issue) => {
+      const created = new Date(issue.createdAt);
+      const mKey = monthKeyOf(created);
+      if (!validKeys.has(mKey)) return;
+      const area = issue.issueArea ?? 'Unspecified';
+      const months = perArea.get(area) ?? new Map<string, number>();
+      months.set(mKey, (months.get(mKey) ?? 0) + 1);
+      perArea.set(area, months);
+    });
+
+    const totals = Array.from(perArea.entries())
+      .map(([area, months]) => ({
+        area,
+        total: Array.from(months.values()).reduce((a, b) => a + b, 0),
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    const topAreas = totals.slice(0, AREA_CHART_COLORS.length).map((t) => t.area);
+    const otherAreas = totals.slice(AREA_CHART_COLORS.length).map((t) => t.area);
+    const series = [...topAreas, ...(otherAreas.length > 0 ? [OTHER_AREAS_LABEL] : [])];
+
+    const chartData = monthBuckets.map((bucket) => {
+      const row: Record<string, string | number> = { month: bucket.label };
+      topAreas.forEach((area) => {
+        row[area] = perArea.get(area)?.get(bucket.key) ?? 0;
+      });
+      if (otherAreas.length > 0) {
+        row[OTHER_AREAS_LABEL] = otherAreas.reduce(
+          (sum, area) => sum + (perArea.get(area)?.get(bucket.key) ?? 0),
+          0
+        );
+      }
+      return row;
+    });
+
+    const latest = monthBuckets[monthBuckets.length - 1];
+    const previous = monthBuckets[monthBuckets.length - 2];
+    const movement = totals
+      .map(({ area, total }) => {
+        const months = perArea.get(area)!;
+        const current = months.get(latest.key) ?? 0;
+        const prior = previous ? months.get(previous.key) ?? 0 : 0;
+        return { area, current, prior, change: current - prior, total };
+      })
+      .sort((a, b) => b.change - a.change || b.current - a.current);
+
+    return {
+      chartData,
+      series,
+      movement,
+      latestLabel: latest.label,
+      previousLabel: previous?.label ?? '—',
+      hasData: totals.length > 0,
+    };
+  }, [mockIssues, monthBuckets]);
+
+  const resolutionTimes = useMemo(() => {
+    const DAY = 1000 * 60 * 60 * 24;
+    const resolved = mockIssues
+      .filter((issue) => issue.closed && issue.closedAt)
+      .map((issue) => ({
+        area: issue.issueArea ?? 'Unspecified',
+        closedAt: new Date(issue.closedAt as Date),
+        days: Math.max(
+          0,
+          (new Date(issue.closedAt as Date).getTime() - new Date(issue.createdAt).getTime()) / DAY
+        ),
+      }));
+
+    const missingCloseDate = mockIssues.filter((i) => i.closed && !i.closedAt).length;
+
+    const allDays = resolved.map((r) => r.days).sort((a, b) => a - b);
+    const average = allDays.length > 0 ? allDays.reduce((a, b) => a + b, 0) / allDays.length : 0;
+    const median =
+      allDays.length === 0
+        ? 0
+        : allDays.length % 2 === 1
+          ? allDays[(allDays.length - 1) / 2]
+          : (allDays[allDays.length / 2 - 1] + allDays[allDays.length / 2]) / 2;
+
+    const monthly = monthBuckets.map((bucket) => {
+      const inMonth = resolved.filter(
+        (r) => r.closedAt.getMonth() === bucket.month && r.closedAt.getFullYear() === bucket.year
+      );
+      return {
+        month: bucket.label,
+        avgDays:
+          inMonth.length > 0
+            ? Number((inMonth.reduce((s, r) => s + r.days, 0) / inMonth.length).toFixed(1))
+            : 0,
+        closed: inMonth.length,
+      };
+    });
+
+    const byAreaMap = new Map<string, number[]>();
+    resolved.forEach((r) => {
+      const list = byAreaMap.get(r.area) ?? [];
+      list.push(r.days);
+      byAreaMap.set(r.area, list);
+    });
+    const byArea = Array.from(byAreaMap.entries())
+      .map(([area, days]) => ({
+        area,
+        closed: days.length,
+        avgDays: days.reduce((a, b) => a + b, 0) / days.length,
+      }))
+      .sort((a, b) => b.avgDays - a.avgDays);
+
+    return {
+      count: resolved.length,
+      average,
+      median,
+      monthly,
+      byArea,
+      missingCloseDate,
+    };
+  }, [mockIssues, monthBuckets]);
 
   const dailyActivity = useMemo(() => {
     const days: { date: string; label: string; count: number }[] = [];
