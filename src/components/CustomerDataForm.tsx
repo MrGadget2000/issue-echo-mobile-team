@@ -28,8 +28,16 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const trimmedData: CustomerData = {
+      customerName: formData.customerName.trim(),
+      orderId: formData.orderId.trim(),
+      phoneNumber: formData.phoneNumber.trim(),
+      serviceType: formData.serviceType,
+      additionalDetails: formData.additionalDetails.trim()
+    };
+    
     // Validate form data
-    const result = customerDataSchema.safeParse(formData);
+    const result = customerDataSchema.safeParse(trimmedData);
     
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -48,10 +56,10 @@ export function CustomerDataForm({ onSubmit, onCancel }: CustomerDataFormProps) 
     }
     
     // Only submit if at least one field is filled
-    const hasData = Object.values(formData).some(value => value && value.trim() !== '');
+    const hasData = Object.values(trimmedData).some(value => value && value.trim() !== '');
     if (hasData) {
       setErrors({});
-      onSubmit(formData);
+      onSubmit(trimmedData);
     }
   };
 
