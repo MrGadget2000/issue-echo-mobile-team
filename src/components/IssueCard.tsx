@@ -47,6 +47,7 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
       tabIndex={0}
       onClick={() => setDetailOpen(true)}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           setDetailOpen(true);
