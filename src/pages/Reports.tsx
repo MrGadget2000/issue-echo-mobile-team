@@ -629,6 +629,167 @@ const Reports = () => {
           </CardContent>
         </Card>
 
+        {/* Area trends over time */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Area Trends (last 6 months)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!areaTrends.hasData ? (
+              <p className="text-sm text-muted-foreground">No issues raised in the last 6 months.</p>
+            ) : (
+              <>
+                <div className="h-72 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={areaTrends.chartData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 11 }} />
+                      {areaTrends.series.map((area, idx) => (
+                        <Bar
+                          key={area}
+                          dataKey={area}
+                          stackId="areas"
+                          fill={
+                            area === OTHER_AREAS_LABEL
+                              ? 'hsl(var(--chart-7))'
+                              : AREA_CHART_COLORS[idx % AREA_CHART_COLORS.length]
+                          }
+                        />
+                      ))}
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Movement from {areaTrends.previousLabel} to {areaTrends.latestLabel} — biggest increases first.
+                  </p>
+                  {areaTrends.movement.map((row) => (
+                    <div key={row.area} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <span className="font-medium text-sm">{row.area}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{row.prior} prev</Badge>
+                        <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                          {row.current} now
+                        </Badge>
+                        <span
+                          className={`flex items-center gap-1 text-xs font-medium ${
+                            row.change > 0
+                              ? 'text-destructive'
+                              : row.change < 0
+                                ? 'text-vote'
+                                : 'text-muted-foreground'
+                          }`}
+                        >
+                          {row.change > 0 ? (
+                            <TrendingUp className="h-3.5 w-3.5" />
+                          ) : row.change < 0 ? (
+                            <TrendingDown className="h-3.5 w-3.5" />
+                          ) : (
+                            <Minus className="h-3.5 w-3.5" />
+                          )}
+                          {row.change > 0 ? `+${row.change}` : row.change}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Time to resolve */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Timer className="h-5 w-5" />
+              Time to Resolve
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {resolutionTimes.count === 0 ? (
+              <p className="text-sm text-muted-foreground">No closed issues with a recorded close date yet.</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Average days to close</div>
+                    <div className="text-2xl font-bold">{resolutionTimes.average.toFixed(1)}</div>
+                  </div>
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Median days to close</div>
+                    <div className="text-2xl font-bold">{resolutionTimes.median.toFixed(1)}</div>
+                  </div>
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <div className="text-xs text-muted-foreground">Closed issues measured</div>
+                    <div className="text-2xl font-bold">{resolutionTimes.count}</div>
+                  </div>
+                </div>
+
+                <div className="h-64 w-full mt-6">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={resolutionTimes.monthly} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        formatter={(value: number) => [`${value} days`, 'Avg time to close']}
+                      />
+                      <Bar dataKey="avgDays" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Average days between raising and closing, by the month the issue was closed.
+                </p>
+
+                <div className="mt-6 space-y-2">
+                  <p className="text-xs text-muted-foreground">Slowest areas first.</p>
+                  {resolutionTimes.byArea.map((row) => (
+                    <div key={row.area} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                      <span className="font-medium text-sm">{row.area}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">{row.closed} closed</Badge>
+                        <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">
+                          {row.avgDays.toFixed(1)} days avg
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {resolutionTimes.missingCloseDate > 0 && (
+                  <p className="text-xs text-muted-foreground mt-3">
+                    {resolutionTimes.missingCloseDate} closed{' '}
+                    {resolutionTimes.missingCloseDate === 1 ? 'issue has' : 'issues have'} no recorded close date and
+                    {resolutionTimes.missingCloseDate === 1 ? ' is' : ' are'} excluded from these figures.
+                  </p>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Top Reporters */}
         <Card className="mt-6 bg-gradient-card shadow-card">
           <CardHeader>
