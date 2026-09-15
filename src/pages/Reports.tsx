@@ -3,8 +3,9 @@ import { Link, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer } from 'lucide-react';
+import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer, Target, Grid2x2, Layers, Wrench, Repeat } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { scoreIssue, type ScoredIssue } from '@/lib/priority';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -312,6 +313,82 @@ const Reports = () => {
     });
     return days.map((d) => ({ ...d, count: buckets.get(d.date) ?? 0 }));
   }, [mockIssues]);
+
+  // ---- Prioritisation views (open issues only) ----
+  const prioritised = useMemo(
+    () => mockIssues.filter((i) => !i.closed).map(scoreIssue).sort((a, b) => b.score - a.score),
+    [mockIssues]
+  );
+
+  const quadrants = useMemo(() => {
+    const effortRank: Record<string, number> = { Small: 1, Unknown: 2, Medium: 2, Large: 3 };
+    const groups = {
+      quickWins: [] as ScoredIssue[],
+      bigBets: [] as ScoredIssue[],
+      fillIns: [] as ScoredIssue[],
+      questionable: [] as ScoredIssue[],
+    };
+    prioritised.forEach((s) => {
+      const highImpact = s.impactPoints >= 5;
+      const lowEffort = effortRank[s.effort.band] <= 1;
+      if (highImpact && lowEffort) groups.quickWins.push(s);
+      else if (highImpact) groups.bigBets.push(s);
+      else if (lowEffort) groups.fillIns.push(s);
+      else groups.questionable.push(s);
+    });
+    return groups;
+  }, [prioritised]);
+
+  const areaPriority = useMemo(() => {
+    const map = new Map<string, {
+      area: string;
+      open: number;
+      votes: number;
+      examples: number;
+      noWorkaround: number;
+      churnRisk: number;
+      score: number;
+      effortPoints: number;
+    }>();
+    prioritised.forEach((s) => {
+      const area = s.issue.issueArea ?? 'Unspecified';
+      const entry = map.get(area) ?? {
+        area, open: 0, votes: 0, examples: 0, noWorkaround: 0, churnRisk: 0, score: 0, effortPoints: 0,
+      };
+      entry.open += 1;
+      entry.votes += s.issue.votes;
+      entry.examples += s.issue.customerData.length;
+      if (!s.workaround) entry.noWorkaround += 1;
+      if (s.issue.churnRisk) entry.churnRisk += 1;
+      entry.score += s.score;
+      entry.effortPoints += s.effort.weight;
+      map.set(area, entry);
+    });
+    return Array.from(map.values())
+      .map((e) => ({ ...e, avgEffort: e.effortPoints / e.open }))
+      .sort((a, b) => b.score - a.score);
+  }, [prioritised]);
+
+  const manualWork = useMemo(() => {
+    const noWorkaround = prioritised.filter((s) => !s.workaround);
+    return {
+      count: noWorkaround.length,
+      votes: noWorkaround.reduce((sum, s) => sum + s.issue.votes, 0),
+      churnRisk: noWorkaround.filter((s) => s.issue.churnRisk).length,
+      top: noWorkaround.sort((a, b) => b.issue.votes - a.issue.votes).slice(0, 5),
+    };
+  }, [prioritised]);
+
+  const repeatPain = useMemo(
+    () =>
+      mockIssues
+        .filter((i) => !i.closed && i.customerData.length > 0)
+        .sort((a, b) => b.customerData.length - a.customerData.length)
+        .slice(0, 8),
+    [mockIssues]
+  );
+
+
 
   if (authLoading || roleLoading) {
     return (
@@ -789,6 +866,246 @@ const Reports = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Priority ranking */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Priority Ranking — What to Fix First
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {prioritised.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No open issues to prioritise.</p>
+            ) : (
+              <div className="space-y-2">
+                {prioritised.slice(0, 10).map((s, idx) => (
+                  <div key={s.issue.id} className="flex items-start justify-between gap-4 p-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-start gap-3 min-w-0">
+                      <Badge variant="outline" className="w-8 justify-center shrink-0">#{idx + 1}</Badge>
+                      <div className="min-w-0">
+                        <div className="font-medium text-sm truncate">{s.issue.title}</div>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                          <Badge variant="outline" className="text-xs">{s.issue.issueArea ?? 'Unspecified'}</Badge>
+                          <Badge variant="outline" className="text-xs">{s.effort.band} effort</Badge>
+                          <Badge variant="outline" className="text-xs">{s.issue.votes} votes</Badge>
+                          {s.issue.customerData.length > 0 && (
+                            <Badge variant="outline" className="text-xs">{s.issue.customerData.length} examples</Badge>
+                          )}
+                          {!s.workaround && (
+                            <Badge variant="outline" className="text-xs bg-accent/10 text-accent border-accent/20">No workaround</Badge>
+                          )}
+                          {s.issue.churnRisk && (
+                            <Badge variant="outline" className="text-xs bg-destructive/10 text-destructive border-destructive/20">Churn risk</Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-xl font-bold">{s.score}</div>
+                      <div className="text-xs text-muted-foreground">score</div>
+                    </div>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground pt-2">
+                  Score combines votes and repeat customer examples with customer/team impact, lifted for churn risk
+                  and missing workarounds, then divided by the effort to resolve. Higher means better return for the work.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Impact vs effort quadrants */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Grid2x2 className="h-5 w-5" />
+              Impact vs Effort
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {([
+                { key: 'quickWins', title: 'Quick wins', note: 'High impact, low effort — do these now', list: quadrants.quickWins },
+                { key: 'bigBets', title: 'Big bets', note: 'High impact, larger effort — plan these', list: quadrants.bigBets },
+                { key: 'fillIns', title: 'Fill-ins', note: 'Lower impact, low effort — bundle with other work', list: quadrants.fillIns },
+                { key: 'questionable', title: 'Reconsider', note: 'Lower impact, larger effort — park or reframe', list: quadrants.questionable },
+              ] as const).map((q) => (
+                <div key={q.key} className="p-4 bg-muted/30 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">{q.title}</span>
+                    <Badge variant="outline">{q.list.length}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{q.note}</p>
+                  <div className="mt-3 space-y-1">
+                    {q.list.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Nothing here.</p>
+                    ) : (
+                      q.list.slice(0, 5).map((s) => (
+                        <div key={s.issue.id} className="text-xs flex items-center justify-between gap-2">
+                          <span className="truncate">{s.issue.title}</span>
+                          <span className="text-muted-foreground shrink-0">{s.score}</span>
+                        </div>
+                      ))
+                    )}
+                    {q.list.length > 5 && (
+                      <p className="text-xs text-muted-foreground">+{q.list.length - 5} more</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Impact uses customer impact (weighted double) plus team impact. Effort is read from the effort estimate text;
+              issues with no estimate are treated as medium effort.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Area priority summary */}
+        <Card className="mt-6 bg-gradient-card shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Layers className="h-5 w-5" />
+              Area Priority Summary
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {areaPriority.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No open issues yet.</p>
+            ) : (
+              <>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={areaPriority.slice(0, 8).map((a) => ({ area: a.area, score: Math.round(a.score * 10) / 10 }))}
+                      margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="area" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} interval={0} angle={-20} textAnchor="end" height={60} />
+                      <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+                      <Tooltip
+                        contentStyle={{
+                          background: 'hsl(var(--background))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: 8,
+                          fontSize: 12,
+                        }}
+                        formatter={(value: number) => [value, 'Priority score']}
+                      />
+                      <Bar dataKey="score" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {areaPriority.map((a) => (
+                    <div key={a.area} className="flex flex-wrap items-center justify-between gap-2 p-3 bg-muted/30 rounded-lg">
+                      <span className="font-medium text-sm">{a.area}</span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <Badge variant="outline" className="text-xs">{a.open} open</Badge>
+                        <Badge variant="outline" className="text-xs">{a.votes} votes</Badge>
+                        <Badge variant="outline" className="text-xs">{a.examples} examples</Badge>
+                        <Badge variant="outline" className="text-xs">{a.noWorkaround} no workaround</Badge>
+                        {a.churnRisk > 0 && (
+                          <Badge variant="outline" className="text-xs bg-destructive/10 text-destructive border-destructive/20">
+                            {a.churnRisk} churn risk
+                          </Badge>
+                        )}
+                        <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/20">
+                          score {Math.round(a.score * 10) / 10}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Areas are ranked by the combined priority score of their open issues, so the areas costing the most
+                  manual work sit at the top.
+                </p>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Manual work burden + repeat pain */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <Card className="bg-gradient-card shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wrench className="h-5 w-5" />
+                Manual Work Burden
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <div className="text-xs text-muted-foreground">No workaround</div>
+                  <div className="text-2xl font-bold">{manualWork.count}</div>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <div className="text-xs text-muted-foreground">Votes behind them</div>
+                  <div className="text-2xl font-bold">{manualWork.votes}</div>
+                </div>
+                <div className="p-3 bg-muted/30 rounded-lg">
+                  <div className="text-xs text-muted-foreground">Also churn risk</div>
+                  <div className="text-2xl font-bold">{manualWork.churnRisk}</div>
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                {manualWork.top.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Every open issue has a workaround recorded.</p>
+                ) : (
+                  manualWork.top.map((s) => (
+                    <div key={s.issue.id} className="flex items-center justify-between gap-2 p-3 bg-muted/30 rounded-lg">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">{s.issue.title}</div>
+                        <div className="text-xs text-muted-foreground">{s.issue.issueArea ?? 'Unspecified'}</div>
+                      </div>
+                      <Badge variant="outline" className="shrink-0">{s.issue.votes} votes</Badge>
+                    </div>
+                  ))
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                These issues force manual handling every time they occur, so they carry the highest ongoing effort cost.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-card shadow-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Repeat className="h-5 w-5" />
+                Repeat Pain — Most Real Examples
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {repeatPain.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No customer examples logged against open issues yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {repeatPain.map((issue) => (
+                    <div key={issue.id} className="flex items-center justify-between gap-2 p-3 bg-muted/30 rounded-lg">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium truncate">{issue.title}</div>
+                        <div className="text-xs text-muted-foreground">{issue.issueArea ?? 'Unspecified'}</div>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 bg-accent/10 text-accent border-accent/20">
+                        {issue.customerData.length} {issue.customerData.length === 1 ? 'example' : 'examples'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground mt-3">
+                Counts real customer or order examples attached to each open issue — evidence of how often the problem
+                actually recurs, not just how many people voted.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Top Reporters */}
         <Card className="mt-6 bg-gradient-card shadow-card">
