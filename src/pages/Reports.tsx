@@ -3,8 +3,9 @@ import { Link, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer } from 'lucide-react';
+import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer, Target, Grid2x2, Layers, Wrench, Repeat } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
+import { scoreIssue, type ScoredIssue } from '@/lib/priority';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -312,6 +313,82 @@ const Reports = () => {
     });
     return days.map((d) => ({ ...d, count: buckets.get(d.date) ?? 0 }));
   }, [mockIssues]);
+
+  // ---- Prioritisation views (open issues only) ----
+  const prioritised = useMemo(
+    () => mockIssues.filter((i) => !i.closed).map(scoreIssue).sort((a, b) => b.score - a.score),
+    [mockIssues]
+  );
+
+  const quadrants = useMemo(() => {
+    const effortRank: Record<string, number> = { Small: 1, Unknown: 2, Medium: 2, Large: 3 };
+    const groups = {
+      quickWins: [] as ScoredIssue[],
+      bigBets: [] as ScoredIssue[],
+      fillIns: [] as ScoredIssue[],
+      questionable: [] as ScoredIssue[],
+    };
+    prioritised.forEach((s) => {
+      const highImpact = s.impactPoints >= 5;
+      const lowEffort = effortRank[s.effort.band] <= 1;
+      if (highImpact && lowEffort) groups.quickWins.push(s);
+      else if (highImpact) groups.bigBets.push(s);
+      else if (lowEffort) groups.fillIns.push(s);
+      else groups.questionable.push(s);
+    });
+    return groups;
+  }, [prioritised]);
+
+  const areaPriority = useMemo(() => {
+    const map = new Map<string, {
+      area: string;
+      open: number;
+      votes: number;
+      examples: number;
+      noWorkaround: number;
+      churnRisk: number;
+      score: number;
+      effortPoints: number;
+    }>();
+    prioritised.forEach((s) => {
+      const area = s.issue.issueArea ?? 'Unspecified';
+      const entry = map.get(area) ?? {
+        area, open: 0, votes: 0, examples: 0, noWorkaround: 0, churnRisk: 0, score: 0, effortPoints: 0,
+      };
+      entry.open += 1;
+      entry.votes += s.issue.votes;
+      entry.examples += s.issue.customerData.length;
+      if (!s.workaround) entry.noWorkaround += 1;
+      if (s.issue.churnRisk) entry.churnRisk += 1;
+      entry.score += s.score;
+      entry.effortPoints += s.effort.weight;
+      map.set(area, entry);
+    });
+    return Array.from(map.values())
+      .map((e) => ({ ...e, avgEffort: e.effortPoints / e.open }))
+      .sort((a, b) => b.score - a.score);
+  }, [prioritised]);
+
+  const manualWork = useMemo(() => {
+    const noWorkaround = prioritised.filter((s) => !s.workaround);
+    return {
+      count: noWorkaround.length,
+      votes: noWorkaround.reduce((sum, s) => sum + s.issue.votes, 0),
+      churnRisk: noWorkaround.filter((s) => s.issue.churnRisk).length,
+      top: noWorkaround.sort((a, b) => b.issue.votes - a.issue.votes).slice(0, 5),
+    };
+  }, [prioritised]);
+
+  const repeatPain = useMemo(
+    () =>
+      mockIssues
+        .filter((i) => !i.closed && i.customerData.length > 0)
+        .sort((a, b) => b.customerData.length - a.customerData.length)
+        .slice(0, 8),
+    [mockIssues]
+  );
+
+
 
   if (authLoading || roleLoading) {
     return (
