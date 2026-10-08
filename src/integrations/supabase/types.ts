@@ -182,6 +182,7 @@ export type Database = {
       }
       poll_questions: {
         Row: {
+          closed_at: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -189,6 +190,7 @@ export type Database = {
           week_start: string
         }
         Insert: {
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -196,6 +198,7 @@ export type Database = {
           week_start: string
         }
         Update: {
+          closed_at?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -208,6 +211,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          poll_id: string | null
           score: number
           user_id: string
           week_start: string
@@ -215,6 +219,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          poll_id?: string | null
           score: number
           user_id: string
           week_start: string
@@ -222,11 +227,20 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          poll_id?: string | null
           score?: number
           user_id?: string
           week_start?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "poll_questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_emails: {
         Row: {
@@ -305,6 +319,7 @@ export type Database = {
       cast_poll_vote: { Args: { _score: number }; Returns: boolean }
       cast_vote: { Args: { _issue_id: string }; Returns: Json }
       claim_first_admin: { Args: never; Returns: boolean }
+      close_current_poll: { Args: never; Returns: boolean }
       get_current_poll: { Args: never; Returns: Json }
       grant_admin_by_email: { Args: { _email: string }; Returns: boolean }
       revoke_admin: { Args: { _user_id: string }; Returns: boolean }
@@ -313,6 +328,7 @@ export type Database = {
         Args: { _approved: boolean; _user_id: string }
         Returns: boolean
       }
+      start_new_poll: { Args: { _question: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
