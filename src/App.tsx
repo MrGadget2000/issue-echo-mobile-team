@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ClosedIssues from "./pages/ClosedIssues";
 import Reports from "./pages/Reports";
+import Poll from "./pages/Poll";
 import NotFound from "./pages/NotFound";
 import { useInactivityRefresh } from "./hooks/useInactivityRefresh";
 import { AuthGate } from "./components/AuthGate";
@@ -24,6 +25,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/closed" element={<ClosedIssues />} />
+            <Route path="/poll" element={<Poll />} />
             <Route path="/reports" element={<Reports />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

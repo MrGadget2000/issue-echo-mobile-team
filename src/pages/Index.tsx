@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
 import { NewIssueForm } from '@/components/NewIssueForm';
-import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut, Download } from 'lucide-react';
+import { Plus, Search, TrendingUp, AlertTriangle, Archive, BarChart3, Loader2, LogIn, LogOut, Download , Vote } from 'lucide-react';
 import { exportIssuesToCsv } from '@/lib/exportCsv';
 import { CustomerData } from '@/types/issue';
 import { useToast } from '@/hooks/use-toast';
@@ -189,6 +189,10 @@ const Index = () => {
           <Link to="/closed" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
             <Archive className="h-4 w-4" />
             Closed Issues ({closedIssuesCount})
+          </Link>
+          <Link to="/poll" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+            <Vote className="h-4 w-4" />
+            Poll
           </Link>
           {isAdmin && (
             <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">

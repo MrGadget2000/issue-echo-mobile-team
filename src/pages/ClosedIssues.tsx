@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { IssueCard } from '@/components/IssueCard';
-import { Search, Archive, ArrowLeft, BarChart3, Loader2 } from 'lucide-react';
+import { Search, Archive, ArrowLeft, BarChart3, Loader2 , Vote } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useIssues } from '@/hooks/useIssues';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -84,6 +84,10 @@ const ClosedIssues = () => {
             <Archive className="h-4 w-4" />
             Closed Issues
           </span>
+          <Link to="/poll" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+            <Vote className="h-4 w-4" />
+            Poll
+          </Link>
           {isAdmin && (
             <Link to="/reports" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
