@@ -180,6 +180,54 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_questions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          question: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          question: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          question?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score: number
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       profile_emails: {
         Row: {
           created_at: string
@@ -254,10 +302,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cast_poll_vote: { Args: { _score: number }; Returns: boolean }
       cast_vote: { Args: { _issue_id: string }; Returns: Json }
       claim_first_admin: { Args: never; Returns: boolean }
+      get_current_poll: { Args: never; Returns: Json }
       grant_admin_by_email: { Args: { _email: string }; Returns: boolean }
       revoke_admin: { Args: { _user_id: string }; Returns: boolean }
+      set_poll_question: { Args: { _question: string }; Returns: boolean }
       set_user_approved: {
         Args: { _approved: boolean; _user_id: string }
         Returns: boolean
