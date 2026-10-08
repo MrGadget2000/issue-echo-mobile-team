@@ -3,12 +3,13 @@ import { Link, Navigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer, Target, Grid2x2, Layers, Wrench, Repeat } from 'lucide-react';
+import { CalendarDays, TrendingUp, TrendingDown, Minus, Clock, Users, Archive, BarChart3, Loader2, UserCircle2, Shield, Lock, Timer, Target, Grid2x2, Layers, Wrench, Repeat , Vote } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from 'recharts';
 import { scoreIssue, type ScoredIssue } from '@/lib/priority';
 import { useIssues } from '@/hooks/useIssues';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { PollHistory } from '@/components/PollHistory';
 import { AdminPanel } from '@/components/AdminPanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -467,6 +468,10 @@ const Reports = () => {
           <Link to="/closed" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
             <Archive className="h-4 w-4" />
             Closed Issues ({closedIssuesCount})
+          </Link>
+          <Link to="/poll" className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+            <Vote className="h-4 w-4" />
+            Poll
           </Link>
           <Link to="/reports" className="text-primary font-medium border-b-2 border-primary pb-1 flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -1152,6 +1157,8 @@ const Reports = () => {
             )}
           </CardContent>
         </Card>
+
+        <PollHistory />
 
         <div className="mt-6">
           <AdminPanel currentUserId={user!.id} onChange={refreshRole} />
