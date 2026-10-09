@@ -186,6 +186,8 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          options: string[] | null
+          poll_type: string
           question: string
           week_start: string
         }
@@ -194,6 +196,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          options?: string[] | null
+          poll_type?: string
           question: string
           week_start: string
         }
@@ -202,6 +206,8 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          options?: string[] | null
+          poll_type?: string
           question?: string
           week_start?: string
         }
@@ -209,26 +215,29 @@ export type Database = {
       }
       poll_votes: {
         Row: {
+          answer: string | null
           created_at: string
           id: string
           poll_id: string | null
-          score: number
+          score: number | null
           user_id: string
           week_start: string
         }
         Insert: {
+          answer?: string | null
           created_at?: string
           id?: string
           poll_id?: string | null
-          score: number
+          score?: number | null
           user_id: string
           week_start: string
         }
         Update: {
+          answer?: string | null
           created_at?: string
           id?: string
           poll_id?: string | null
-          score?: number
+          score?: number | null
           user_id?: string
           week_start?: string
         }
@@ -316,6 +325,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cast_poll_answer: {
+        Args: { _answer: string; _score: number }
+        Returns: boolean
+      }
       cast_poll_vote: { Args: { _score: number }; Returns: boolean }
       cast_vote: { Args: { _issue_id: string }; Returns: Json }
       claim_first_admin: { Args: never; Returns: boolean }
@@ -329,6 +342,10 @@ export type Database = {
         Returns: boolean
       }
       start_new_poll: { Args: { _question: string }; Returns: string }
+      start_poll: {
+        Args: { _options: string[]; _question: string; _type: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user"
