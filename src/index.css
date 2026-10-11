@@ -135,3 +135,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes activity-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.activity-track {
+  animation: activity-scroll 45s linear infinite;
+}
+
+.activity-bar:hover .activity-track,
+.activity-bar:focus-within .activity-track,
+.activity-track-paused {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activity-track { animation: none; }
+  .activity-viewport { overflow-x: auto; }
+  .activity-duplicate { display: none; }
+}
