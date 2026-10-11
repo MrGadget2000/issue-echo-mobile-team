@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { weeklyActivity } from './recentActivity';
-import type { Issue } from '@/types/issue';
+import { weeklyActivity } from '../src/lib/recentActivity';
+import type { Issue } from '../src/types/issue';
 
 const issue = (createdAt: string, closedAt?: string): Issue => ({
   id: createdAt, title: 'Example', description: '', votes: 0, customerData: [],
