@@ -15,6 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ISSUE_AREAS } from '@/lib/issueAreas';
+import { RecentActivityBar } from '@/components/RecentActivityBar';
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -201,6 +202,8 @@ const Index = () => {
             </Link>
           )}
         </div>
+
+        <RecentActivityBar issues={issues} loading={loading} />
 
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
           <div className="flex-1">
