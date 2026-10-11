@@ -137,6 +137,7 @@ export type Database = {
           id: string
           issue_area: string | null
           team_impact: string | null
+          team_snapshot: Json | null
           title: string
           updated_at: string
           votes: number
@@ -155,6 +156,7 @@ export type Database = {
           id?: string
           issue_area?: string | null
           team_impact?: string | null
+          team_snapshot?: Json | null
           title: string
           updated_at?: string
           votes?: number
@@ -173,6 +175,7 @@ export type Database = {
           id?: string
           issue_area?: string | null
           team_impact?: string | null
+          team_snapshot?: Json | null
           title?: string
           updated_at?: string
           votes?: number
@@ -220,6 +223,7 @@ export type Database = {
           id: string
           poll_id: string | null
           score: number | null
+          team_snapshot: Json | null
           user_id: string
           week_start: string
         }
@@ -229,6 +233,7 @@ export type Database = {
           id?: string
           poll_id?: string | null
           score?: number | null
+          team_snapshot?: Json | null
           user_id: string
           week_start: string
         }
@@ -238,6 +243,7 @@ export type Database = {
           id?: string
           poll_id?: string | null
           score?: number | null
+          team_snapshot?: Json | null
           user_id?: string
           week_start?: string
         }
@@ -299,6 +305,61 @@ export type Database = {
         }
         Relationships: []
       }
+      team_memberships: {
+        Row: {
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_memberships_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -325,6 +386,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_team: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: undefined
+      }
       cast_poll_answer: {
         Args: { _answer: string; _score: number }
         Returns: boolean
@@ -334,7 +399,20 @@ export type Database = {
       claim_first_admin: { Args: never; Returns: boolean }
       close_current_poll: { Args: never; Returns: boolean }
       get_current_poll: { Args: never; Returns: Json }
+      get_poll_team_results: {
+        Args: { _historical?: boolean; _poll_id: string }
+        Returns: Json
+      }
       grant_admin_by_email: { Args: { _email: string }; Returns: boolean }
+      manage_team: {
+        Args: {
+          _archive?: boolean
+          _id: string
+          _name: string
+          _parent: string
+        }
+        Returns: string
+      }
       revoke_admin: { Args: { _user_id: string }; Returns: boolean }
       set_poll_question: { Args: { _question: string }; Returns: boolean }
       set_user_approved: {
