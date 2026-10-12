@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Vote } from 'lucide-react';
+import { PollTeamResults } from '@/components/PollTeamResults';
 
 type PollType = 'numeric' | 'choice' | 'text';
 type PollRow = {
@@ -101,7 +102,7 @@ export function PollHistory() {
                       <td className="text-right">
                         {w.votes.length > 0 && (
                           <Button size="sm" variant="ghost" onClick={() => setOpen(open === w.id ? null : w.id)}>
-                            {open === w.id ? 'Hide' : 'Voters'}
+                            {open === w.id ? 'Hide' : 'Details / teams'}
                           </Button>
                         )}
                       </td>
@@ -116,6 +117,7 @@ export function PollHistory() {
                               </span>
                             ))}
                           </div>
+                          <PollTeamResults pollId={w.id} type={w.type} historical />
                         </td>
                       </tr>
                     )}

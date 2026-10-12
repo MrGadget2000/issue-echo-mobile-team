@@ -14,6 +14,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { PollTeamResults } from '@/components/PollTeamResults';
 
 type PollType = 'numeric' | 'choice' | 'text';
 type PollState = {
@@ -186,7 +187,7 @@ const Poll = () => {
                 {showResults && type !== 'text' && (
                   <div>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {total} {total === 1 ? 'vote' : 'votes'}{type === 'numeric' && ` · average ${average.toFixed(1)}`}
+                      All users · {total} {total === 1 ? 'vote' : 'votes'}{type === 'numeric' && ` · average ${average.toFixed(1)}`}
                     </p>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -203,7 +204,7 @@ const Poll = () => {
                 )}
                 {showResults && type === 'text' && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-2">{total} {total === 1 ? 'response' : 'responses'}</p>
+                    <p className="text-sm text-muted-foreground mb-2">All users · {total} {total === 1 ? 'response' : 'responses'}</p>
                     <ul className="space-y-2">
                       {(poll?.answers ?? []).map((a, i) => (
                         <li key={i} className="rounded border bg-muted/40 px-3 py-2 text-sm">{a}</li>
@@ -214,6 +215,7 @@ const Poll = () => {
                 {!showResults && poll?.question && (
                   <p className="text-xs text-muted-foreground">Results appear once you've voted.</p>
                 )}
+                {showResults && poll?.poll_id && <PollTeamResults pollId={poll.poll_id} type={type} refreshKey={total} />}
               </CardContent>
             </Card>
 

@@ -1,5 +1,5 @@
 # Teams
-- [ ] Add secure hierarchical teams, membership and historical submission snapshots.
-- [ ] Add admin team management and issue team labels / report roll-ups.
-- [ ] Add current and historical poll team summaries.
-- [ ] Verify rules, permissions and screens.
+- [x] Add secure hierarchical teams, membership and historical submission snapshots.
+- [x] Add admin team management and issue team labels / report roll-ups.
+- [x] Add current and historical poll team summaries.
+- [x] Verify rules, permissions and screens.

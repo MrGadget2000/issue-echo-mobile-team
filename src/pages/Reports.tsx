@@ -11,6 +11,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { PollHistory } from '@/components/PollHistory';
 import { AdminPanel } from '@/components/AdminPanel';
+import { TeamManagement } from '@/components/TeamManagement';
+import { TeamIssueSummary } from '@/components/TeamIssueSummary';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -1159,9 +1161,11 @@ const Reports = () => {
         </Card>
 
         <PollHistory />
+        <TeamIssueSummary issues={mockIssues} />
+        <TeamManagement />
 
         <div className="mt-6">
-          <AdminPanel currentUserId={user!.id} onChange={refreshRole} />
+          {user && <AdminPanel currentUserId={user.id} onChange={refreshRole} />}
         </div>
       </div>
     </div>
