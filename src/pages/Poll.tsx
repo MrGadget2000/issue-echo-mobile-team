@@ -14,6 +14,7 @@ import {
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { PollTeamResults } from '@/components/PollTeamResults';
 
 type PollType = 'numeric' | 'choice' | 'text';
 type PollState = {
@@ -214,6 +215,7 @@ const Poll = () => {
                 {!showResults && poll?.question && (
                   <p className="text-xs text-muted-foreground">Results appear once you've voted.</p>
                 )}
+                {showResults && poll?.poll_id && <PollTeamResults pollId={poll.poll_id} type={type} refreshKey={total} />}
               </CardContent>
             </Card>
 
