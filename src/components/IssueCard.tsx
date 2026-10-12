@@ -86,13 +86,14 @@ export function IssueCard({ issue, profiles, onVote, onAddCustomerData, onCloseI
             )}
           </div>
         </div>
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap gap-2">
           <Badge
             variant="outline"
             className="text-xs border-accent/40 bg-accent/10 text-accent font-medium"
           >
             Area: {issue.issueArea ?? 'Unspecified'}
           </Badge>
+          <Badge variant="outline">Reporter team: {issue.teamSnapshot?.[0]?.name ?? 'Not recorded'}</Badge>
         </div>
       </CardHeader>
       

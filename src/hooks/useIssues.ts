@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Issue, CustomerData, UserProfile } from '@/types/issue';
 import { useAuth } from '@/hooks/useAuth';
+import { parseTeamSnapshot } from '@/lib/teams';
 
 type DbIssueRow = {
   id: string;
@@ -12,6 +13,7 @@ type DbIssueRow = {
   closed_at: string | null;
   closed_by: string | null;
   created_by: string | null;
+  team_snapshot: unknown;
   issue_area: string | null;
   workaround_available: string | null;
   customer_impact: string | null;
@@ -123,6 +125,7 @@ export function useIssues() {
       effortEstimate: row.effort_estimate ?? undefined,
       churnRisk: row.churn_risk ?? undefined,
       createdBy: row.created_by ?? undefined,
+      teamSnapshot: parseTeamSnapshot(row.team_snapshot),
       createdByProfile: row.created_by ? profileMap.get(row.created_by) : undefined,
     }));
 

@@ -118,6 +118,7 @@ export function IssueDetailDialog({ issue, profiles, open, onOpenChange }: Issue
             <h4 className="text-sm font-semibold">Details</h4>
             <div className="grid gap-1 sm:grid-cols-2">
               <Field label="Workaround" value={issue.workaroundAvailable} />
+              <Field label="Reporter team at submission" value={issue.teamSnapshot?.map((team) => team.name).join(' → ') || 'Not recorded'} />
               <Field label="Customer impact" value={issue.customerImpact} />
               <Field label="Team impact" value={issue.teamImpact} />
               <Field label="Effort estimate" value={issue.effortEstimate} />

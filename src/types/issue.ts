@@ -25,6 +25,7 @@ export interface Issue {
   effortEstimate?: string;
   churnRisk?: boolean;
   createdBy?: string;
+  teamSnapshot?: { id: string; name: string }[];
   createdByProfile?: UserProfile;
 }
 
