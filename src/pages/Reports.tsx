@@ -1165,7 +1165,7 @@ const Reports = () => {
         <TeamManagement />
 
         <div className="mt-6">
-          <AdminPanel currentUserId={user!.id} onChange={refreshRole} />
+          {user && <AdminPanel currentUserId={user.id} onChange={refreshRole} />}
         </div>
       </div>
     </div>
